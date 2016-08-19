@@ -1,0 +1,28 @@
+{
+    "project": "apache",
+    "services": [
+        {
+            "id": "frontend",
+            "apps": [
+                {
+                    "id": "apache",
+                    "domain": {
+                        "type": "HTTP",
+                        "uri": "sloppy-cli-testing.sloppy.zone"
+                    },
+                    "mem": 124
+                    "image": "sloppy/apache-php",
+                    "instances": 1,
+                    "port_mappings": [
+                        {
+                            "container_port": 80
+                        },
+                        {
+                            "container_port": 443
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

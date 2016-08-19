@@ -1,0 +1,10 @@
+version: "v1"
+project: "apache"
+services:
+  frontend:
+    apache:
+      domain: "sloppy-cli-testing.sloppy.zone"
+      mem: $memory
+      image: "sloppy/apache-php"
+      instances: $instances
+      port: 80

@@ -1,0 +1,31 @@
+{
+  "project": "volumetest",
+  "services": [
+    {
+      "id": "frontend",
+      "apps": [
+        {
+          "id": "apache",
+          "domain": {
+            "type": "HTTP",
+            "uri": "sloppy-cli-testing.sloppy.zone"
+          },
+          "mem": 512,
+          "image": "sloppy/apache-php",
+          "instances": 1,
+          "port_mappings": [
+            {
+              "container_port": 80
+            }
+          ],
+          "volumes": [
+            {
+              "container_path": "/usr/share/docs",
+              "size": "7GB"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
