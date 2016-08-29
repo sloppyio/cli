@@ -41,12 +41,19 @@ Also include the steps necessary to reproduce the issue if possible. This will h
 Please consider removing sensitive data from your output before posting it.
 
 When actually working on issues, please:
+
 1. Fork this project
+
 2. Setup a new branch to work in
+
 3. Always run `make fmt` on your code before committing it
+
 4. Even if it's a minor change, you should always write tests
+
 5. Run `make test` or `scripts/make.sh test`
+
 6. Try to write good commit messages for each change. Use the [angularjs commit message guide](https://gist.github.com/stephenparish/9941e89d80e2bc58a153)
+
 7. Push the commits to your fork and submit a pull request
 
 
