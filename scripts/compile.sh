@@ -40,7 +40,7 @@ go build \
   -ldflags \
     "-X main.GitCommit=${GIT_COMMIT} \
     -X main.Version=${BUILD_VERSION} \
-    -X main.VersionPrerelease=${pre_release_version}" \
+    -X main.VersionPrerelease=${BUILD_PRE_RELEASE}" \
   ${trim_flags:-} \
   -o "${BUILD_TARGET}/${output:-sloppy}" \
   "./src"
