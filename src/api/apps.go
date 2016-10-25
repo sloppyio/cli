@@ -17,6 +17,7 @@ type App struct {
 	ID           *string           `json:"id,omitempty"`
 	Status       []string          `json:"status,omitempty"`
 	Domain       *Domain           `json:"domain,omitempty"`
+	SSL          *bool             `json:"ssl,omitempty"`
 	Memory       *int              `json:"mem,omitempty"`
 	Instances    *int              `json:"instances,omitempty"`
 	Image        *string           `json:"image,omitempty"`

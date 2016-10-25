@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 
 	"github.com/sloppyio/cli/src/api"
 )
@@ -174,6 +174,12 @@ func (p *project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 								app.Domain = &api.Domain{URI: api.String(domain)}
 							} else {
 								return &yamlError{namespace: id, key: parameter, message: "needs to be a string"}
+							}
+						case "ssl":
+							if ssl, ok := thirdLevel.Value.(bool); ok {
+								app.SSL = api.Bool(ssl)
+							} else {
+								return &yamlError{namespace: id, key: parameter, message: "needs to be boolean"}
 							}
 						case "cmd":
 							if cmd, ok := thirdLevel.Value.(string); ok {

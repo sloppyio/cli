@@ -135,6 +135,7 @@ func TestDecodeYAML(t *testing.T) {
 					{
 						ID:    api.String("apache"),
 						Image: api.String("wordpress:4.2"),
+						SSL:   api.Bool(true),
 						Domain: &api.Domain{
 							URI: api.String("superblog.volks.cloud"),
 						},
@@ -483,6 +484,7 @@ services:
   frontend:
     apache:
       image: "wordpress:4.2"
+      ssl: true
       instances: 1
       mem: 512
       domain: "superblog.volks.cloud"
