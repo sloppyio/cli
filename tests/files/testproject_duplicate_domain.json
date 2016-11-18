@@ -7,7 +7,6 @@
                 {
                     "id": "apache",
                     "domain": {
-                        "type": "HTTP",
                         "uri": "sloppy-cli-testing.sloppy.zone"
                     },
                     "mem": 128,

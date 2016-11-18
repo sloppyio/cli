@@ -34,7 +34,6 @@ func TestDecode_invalidSyntaxJSON(t *testing.T) {
                 {
                     "id": "apache",
                     "domain": {
-                        "type": "HTTP",
                         "uri": "sloppy-cli-testing.sloppy.zone"
                     },
                     "mem": 124
@@ -59,21 +58,21 @@ func TestDecode_invalidSyntaxJSON(t *testing.T) {
 
 	if err := d.DecodeJSON(input); err == nil {
 		t.Error("Expected json syntax error")
-	} else if err.Error() != "got syntax error around line 14:21" {
-		t.Errorf("Error = '%s', want 'got syntax error around line 14:21'", err.Error())
+	} else if err.Error() != "got syntax error around line 13:21" {
+		t.Errorf("Error = '%s', want 'got syntax error around line 13:21'", err.Error())
 	}
 }
 
 func TestDecode_invalidTypeCompactJSON(t *testing.T) {
-	reader := strings.NewReader(`{"project":"apache","services":[{"id":"frontend","apps":[{"id":"apache","domain":{"type":"HTTP","uri":"sloppy-cli-testing.sloppy.zone"},"mem":"124","image":"sloppy/apache-php","instances":1,"port_mappings":[{"container_port":80},{"container_port":443}]}]}]}`)
+	reader := strings.NewReader(`{"project":"apache","services":[{"id":"frontend","apps":[{"id":"apache","domain":{"uri":"sloppy-cli-testing.sloppy.zone"},"mem":"124","image":"sloppy/apache-php","instances":1,"port_mappings":[{"container_port":80},{"container_port":443}]}]}]}`)
 
 	d := newDecoder(reader, stringMap{})
 	input := new(api.Project)
 
 	if err := d.DecodeJSON(input); err == nil {
 		t.Error("Expected json type mismatch error")
-	} else if err.Error() != "got type mismatch on line 1:147, expect number" {
-		t.Errorf("Error = '%s', want 'got type mismatch on line 1:147, expect number'", err.Error())
+	} else if err.Error() != "got type mismatch on line 1:133, expect number" {
+		t.Errorf("Error = '%s', want 'got type mismatch on line 1:133, expect number'", err.Error())
 	}
 }
 
@@ -87,7 +86,6 @@ func TestDecode_invalidTypeJSON(t *testing.T) {
                 {
                     "id": "apache",
                     "domain": {
-                        "type": "HTTP",
                         "uri": "sloppy-cli-testing.sloppy.zone"
                     },
                     "mem": "124",
@@ -112,8 +110,65 @@ func TestDecode_invalidTypeJSON(t *testing.T) {
 
 	if err := d.DecodeJSON(input); err == nil {
 		t.Error("Expected json type mismatch error")
-	} else if err.Error() != "got type mismatch on line 13:32, expect number" {
-		t.Errorf("Error = '%s', want 'got type mismatch on line 13:32, expect number'", err.Error())
+	} else if err.Error() != "got type mismatch on line 12:32, expect number" {
+		t.Errorf("Error = '%s', want 'got type mismatch on line 12:32, expect number'", err.Error())
+	}
+}
+
+func TestDecode_unknownFieldsJSON(t *testing.T) {
+	var unknownFieldsTests = []struct {
+		input       string
+		expectError bool
+	}{
+		0: {
+			input:       `{"foo":"bar"}`,
+			expectError: true,
+		},
+		1: {
+			input:       `{"project":"bar"}`,
+			expectError: false,
+		},
+		2: {
+			input:       `{"project":"bar","services":[{"foo":"test"}]}`,
+			expectError: true,
+		},
+		3: {
+			input:       `{"project":"bar","services":[{"id":"test"}]}`,
+			expectError: false,
+		},
+		4: {
+			input:       `{"project":"bar","services":[{"apps":[{"foo":"test"}]}]}`,
+			expectError: true,
+		},
+		5: {
+			input:       `{"project":"bar","services":[{"apps":[{"id":"test"}]}]}`,
+			expectError: false,
+		},
+		6: {
+			input:       `{"project":"bar","services":[{"apps":[{"id":"test", "port_mappings":[{"foo": 8080}]}]}]}`,
+			expectError: true,
+		},
+		7: {
+			input:       `{"project":"bar","services":[{"apps":[{"id":"test", "port_mapping":[{"container_port": 8080}]}]}]}`,
+			expectError: true,
+		},
+		8: {
+			input:       `{"project":"bar","services":[{"apps":[{"id":"test", "port_mappings":[{"container_port": 8080}]}]}]}`,
+			expectError: false,
+		},
+	}
+
+	for i, tt := range unknownFieldsTests {
+		r := strings.NewReader(tt.input)
+		d := newDecoder(r, stringMap{})
+		input := new(api.Project)
+		err := d.DecodeJSON(input)
+		if err != nil && !tt.expectError {
+			t.Errorf("%d) Unexpected json unknown key error: %v", i, err)
+		}
+		if err == nil && tt.expectError {
+			t.Errorf("%d) Expected json unknown key error", i)
+		}
 	}
 }
 
@@ -475,6 +530,117 @@ func TestReplaceVariables_missingVariable(t *testing.T) {
 	_, err := replaceReader(r, pattern)
 	if err == nil {
 		t.Errorf("Expect error to be returned: pattern: %v input: %s", pattern, "$abc $abc123")
+	}
+}
+
+func TestFindUnknownFields(t *testing.T) {
+	var unknownFieldTests = []struct {
+		fieldMap    map[string]interface{}
+		structType  reflect.Type
+		expectError bool
+	}{
+		0: {
+			fieldMap: map[string]interface{}{
+				"Foo": 1,
+			},
+			structType:  reflect.TypeOf(struct{ Foo int }{}),
+			expectError: false,
+		},
+		1: {
+			fieldMap: map[string]interface{}{
+				"Bar": 1,
+			},
+			structType: reflect.TypeOf(struct {
+				Foo int `json:"Bar"`
+			}{}),
+			expectError: false,
+		},
+		2: {
+			fieldMap: map[string]interface{}{
+				"Bar": 1,
+			},
+			structType:  reflect.TypeOf(struct{ Foo int }{}),
+			expectError: true,
+		},
+		3: {
+			fieldMap: map[string]interface{}{
+				"Foo": []interface{}{"Bar", "Bar"},
+			},
+			structType:  reflect.TypeOf(struct{ Foo []string }{}),
+			expectError: false,
+		},
+		4: {
+			fieldMap: map[string]interface{}{
+				"Foo": []interface{}{
+					map[string]interface{}{
+						"Bar": "test",
+					},
+					map[string]interface{}{
+						"Bar": "test1",
+					},
+				},
+			},
+			structType: reflect.TypeOf(struct {
+				Foo []struct {
+					Bar string
+				}
+			}{}),
+			expectError: false,
+		},
+		5: {
+			fieldMap: map[string]interface{}{
+				"Foo": []interface{}{
+					map[string]interface{}{
+						"Bar": "test",
+					},
+					map[string]interface{}{
+						"Foo": "test1",
+					},
+				},
+			},
+			structType: reflect.TypeOf(struct {
+				Foo []struct {
+					Bar string
+				}
+			}{}),
+			expectError: true,
+		},
+		6: {
+			fieldMap: map[string]interface{}{
+				"Foo": map[string]interface{}{
+					"Bar": "test",
+				},
+			},
+			structType: reflect.TypeOf(struct {
+				Foo struct {
+					Bar string
+				}
+			}{}),
+			expectError: false,
+		},
+		7: {
+			fieldMap: map[string]interface{}{
+				"Foo": map[string]interface{}{
+					"Foo": "test1",
+				},
+			},
+			structType: reflect.TypeOf(struct {
+				Foo struct {
+					Bar string
+				}
+			}{}),
+			expectError: true,
+		},
+	}
+
+	for i, tt := range unknownFieldTests {
+		err := findUnknownFields(tt.fieldMap, tt.structType)
+		if err != nil && !tt.expectError {
+			t.Errorf("%d) Unexpected error = %v; fieldMap: %v struct type: %v", i, err, tt.fieldMap, tt.structType)
+		}
+		if err == nil && tt.expectError {
+			t.Errorf("%d) Expect error to be returned: fieldMap: %v struct type: %v", i, tt.fieldMap, tt.structType)
+		}
 	}
 }
 

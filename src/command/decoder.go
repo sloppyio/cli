@@ -37,9 +37,17 @@ func (d *decoder) DecodeJSON(p *api.Project) error {
 		return d.err
 	}
 
-	err := json.NewDecoder(d.reader).Decode(p)
+	// Detect unknown json keys
+	var aux json.RawMessage
+	var keys map[string]interface{}
+	err := json.NewDecoder(d.reader).Decode(&aux)
 	if err == nil {
-		return nil
+		err = json.Unmarshal(aux, p)
+		if err := json.Unmarshal(aux, &keys); err == nil {
+			if err := findUnknownFields(keys, reflect.TypeOf(*p)); err != nil {
+				return err
+			}
+		}
 	}
 
 	offset := 0
@@ -456,4 +464,73 @@ func replaceReader(r io.Reader, pattern map[string]string) (io.Reader, error) {
 	})
 
 	return bytes.NewReader(data), err
+}
+
+// findUnknownFields returns an error if fields map does not match the given type.
+// As soon as https://github.com/golang/go/issues/15314 gets accepted, we can remove
+// the following function.
+func findUnknownFields(fields map[string]interface{}, t reflect.Type) error {
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+
+		// Skip unexported fields of struct.
+		if f.PkgPath != "" && !f.Anonymous {
+			continue
+		}
+
+		tag := f.Tag.Get("json")
+		if tag == "-" {
+			continue
+		}
+		if tag == "" {
+			tag = f.Name
+		}
+		if j := strings.Index(tag, ","); j != -1 {
+			tag = tag[:j]
+		}
+
+		ft := f.Type
+		if f.Type.Kind() == reflect.Ptr {
+			ft = f.Type.Elem()
+		}
+
+		switch ft.Kind() {
+		case reflect.Struct:
+			if v, ok := fields[tag].(map[string]interface{}); ok {
+				if err := findUnknownFields(v, ft); err != nil {
+					return err
+				}
+			}
+		case reflect.Slice:
+			if ft.Elem().Kind() == reflect.Ptr {
+				ft = ft.Elem()
+			}
+			if ft.Elem().Kind() != reflect.Struct {
+				delete(fields, tag)
+				continue
+			}
+			slice, ok := fields[tag].([]interface{})
+			if !ok {
+				delete(fields, tag)
+				continue
+			}
+
+			for _, elem := range slice {
+				v, ok := elem.(map[string]interface{})
+				if !ok {
+					break
+				}
+				if err := findUnknownFields(v, ft.Elem()); err != nil {
+					return err
+				}
+			}
+		}
+		delete(fields, tag)
+	}
+
+	for key := range fields {
+		return fmt.Errorf("json: key '%s' not supported", key)
+	}
+
+	return nil
 }

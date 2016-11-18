@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sloppyio/cli/src/ui"
 	"github.com/mitchellh/cli"
+	"github.com/sloppyio/cli/src/ui"
 )
 
 func TestStartCommand_implements(t *testing.T) {
@@ -140,7 +140,7 @@ func TestStartCommand_invalidJSON(t *testing.T) {
 		"../../tests/files/testproject_invalidjson.json",
 	}
 
-	testCodeAndOutput(t, mockUI, c.Run(args), 1, "syntax error around line 14:21")
+	testCodeAndOutput(t, mockUI, c.Run(args), 1, "syntax error around line 13:21")
 }
 
 func TestStartCommand_incorrectFlags(t *testing.T) {
