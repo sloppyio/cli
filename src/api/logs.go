@@ -54,6 +54,9 @@ func retrieveLogs(c *Client, urlStr string, limit int) (<-chan LogEntry, <-chan 
 		return logs, errs
 	}
 
+	// Prevent timeout
+	c.Timer.Stop()
+
 	// Add limit parameter
 	if limit > 0 {
 		values := req.URL.Query()

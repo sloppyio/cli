@@ -3,6 +3,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -43,6 +44,9 @@ type Client struct {
 	// Empty string means unauthorized.
 	accessToken string
 
+	// Timer is used to handle timeouts more granular.
+	Timer *time.Timer
+
 	// API endpoints
 	Projects            *ProjectsEndpoint
 	Services            *ServicesEndpoint
@@ -53,9 +57,7 @@ type Client struct {
 // NewClient returns a new Client to handle API requests.
 func NewClient() *Client {
 	client := &Client{
-		client: &http.Client{
-			Timeout: 2 * time.Minute,
-		},
+		client:    http.DefaultClient,
 		UserAgent: userAgent,
 	}
 
@@ -94,6 +96,12 @@ func (c *Client) SetBaseURL(urlStr string) error {
 // preceding slash. If body is specified, body is JSON encoded and included
 // as request body.
 func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
+	// Timeout
+	ctx, cancel := context.WithCancel(context.TODO())
+	c.Timer = time.AfterFunc(2*time.Minute, func() {
+		cancel()
+	})
+
 	relURL, err := url.Parse(urlStr)
 	if err != nil {
 		return nil, err
@@ -118,6 +126,7 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 	if err != nil {
 		return nil, err
 	}
+	req = req.WithContext(ctx)
 
 	req.Header.Set("User-Agent", c.UserAgent)
 	req.Header.Set("Content-Type", defaultMIMEType)
