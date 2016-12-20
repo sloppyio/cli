@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"runtime/debug"
 
-	"github.com/sloppyio/cli/src/api"
 	"github.com/mitchellh/cli"
+	"github.com/sloppyio/cli/src/api"
 )
 
 const (
@@ -31,14 +31,6 @@ func main() {
 		}
 	}()
 
-	update := make(chan struct{}, 1)
-	go func() {
-		if ok, output := checkVersion(); ok {
-			fmt.Fprint(os.Stderr, output)
-		}
-		update <- struct{}{}
-	}()
-
 	// Shortcut --version, -v to show version command.
 	args := os.Args[1:]
 	for i, arg := range args {
@@ -56,6 +48,19 @@ func main() {
 			stackTrace = true
 			args = append(args[:i], args[i+1:]...)
 		}
+	}
+
+	// Update mechanism
+	update := make(chan struct{}, 1)
+	if len(args) > 0 && args[0] == "version" {
+		update <- struct{}{}
+	} else {
+		go func() {
+			if ok, output := checkVersion(); ok {
+				fmt.Fprint(os.Stderr, output)
+			}
+			update <- struct{}{}
+		}()
 	}
 
 	client = api.NewClient()
