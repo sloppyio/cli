@@ -79,7 +79,10 @@ func updateFile(update bool) (bool, error) {
 }
 
 func getDeployedVersion() (string, error) {
-	resp, err := http.Get(updateURL)
+	client := http.Client{
+		Timeout: time.Duration(5 * time.Second),
+	}
+	resp, err := client.Get(updateURL)
 	if err != nil {
 		return "", err
 	}
