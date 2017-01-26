@@ -523,13 +523,28 @@ func TestReplaceReader(t *testing.T) {
 }
 
 func TestReplaceVariables_missingVariable(t *testing.T) {
-	r := strings.NewReader(`$abc $abc123`)
+	r := strings.NewReader(`$abc $abc123 \\$escaped`)
 	pattern := map[string]string{
 		"abc": "1",
 	}
 	_, err := replaceReader(r, pattern)
 	if err == nil {
-		t.Errorf("Expect error to be returned: pattern: %v input: %s", pattern, "$abc $abc123")
+		t.Errorf("Expect error to be returned: pattern: %v input: %s", pattern, "$abc $abc123 \\$escaped")
+	}
+}
+
+func TestReplaceVariables_escapedVariable(t *testing.T) {
+	r := strings.NewReader(`$abc \\$abc123`)
+	pattern := map[string]string{
+		"abc": "1",
+	}
+	rr, err := replaceReader(r, pattern)
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+	}
+	b, _ := ioutil.ReadAll(rr)
+	if string(b) != `1 $abc123` {
+		t.Errorf("replaceReader(%v) = %s, want 1 $abc123", pattern, string(b))
 	}
 }
 

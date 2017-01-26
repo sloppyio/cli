@@ -444,7 +444,7 @@ func (e *yamlError) Error() string {
 	return fmt.Sprintf("%s%s", attribute, e.message)
 }
 
-var validVar = regexp.MustCompile(`(\$[[:alnum:]_-]+)`)
+var validVar = regexp.MustCompile(`(?:\\)*\$[[:alnum:]_-]+`)
 
 // replaceReader returns an io.Reader, replacing matches of all variables with
 // the replacement pattern, or returns error if any.
@@ -455,11 +455,16 @@ func replaceReader(r io.Reader, pattern map[string]string) (io.Reader, error) {
 	}
 
 	data = validVar.ReplaceAllFunc(data, func(b []byte) []byte {
-		if v, ok := pattern[string(b[1:])]; ok {
+		i := bytes.Index(b, []byte{'$'})
+		// Ignore escaped variables
+		if c := bytes.Count(b[:i], []byte{'\\'}); c > 0 && c%2 == 0 {
+			return b[i:]
+		}
+		if v, ok := pattern[string(b[i+1:])]; ok {
 			return []byte(v)
 		}
 
-		err = fmt.Errorf("missing variable '%s'. ", string(b[1:]))
+		err = fmt.Errorf("missing variable '%s'. ", string(b[i+1:]))
 		return b
 	})
 

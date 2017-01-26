@@ -12,6 +12,9 @@
                     "mem": $memory,
                     "image": "sloppy/apache-php",
                     "instances": $instances,
+                    "env": {
+                        "MESSAGE": "\\$escaped"
+                    },
                     "port_mappings": [
                         {
                             "container_port": 80

@@ -7,4 +7,6 @@ services:
       mem: $memory
       image: "sloppy/apache-php"
       instances: $instances
+      env:
+        - ESCAPED: "\\$escaped"
       port: 80
