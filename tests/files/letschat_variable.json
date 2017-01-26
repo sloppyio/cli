@@ -1,0 +1,53 @@
+{
+    "project": "letschat",
+    "services": [
+        {
+            "id": "frontend",
+            "apps": [
+                {
+                    "id": "node",
+                    "domain": {
+                        "uri": "letschat.sloppy.zone"
+                    },
+                    "mem": $memory,
+                    "image": "mikemichel/lets-chat",
+                    "instances": $instances,
+                    "port_mappings": [
+                        {
+                            "container_port": 5000
+                        }
+                    ],
+                    "volumes": [
+                        {
+                            "container_path": "/var/www",
+                            "size":"8GB"
+                        },
+                        {
+                            "container_path": "/var/test",
+                            "size":"8GB"
+                        }
+                    ],
+                    "env": {
+                        "LCB_DATABASE_URI": "mongodb://..."
+                    }
+                }
+            ]
+        },
+        {
+            "id": "backend",
+            "apps": [
+                {
+                    "id": "mongodb",
+                    "mem": 512,
+                    "image": "mongodb",
+                    "instances": 1,
+                    "port_mappings": [
+                        {
+                            "container_port": 27017
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

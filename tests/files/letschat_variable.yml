@@ -1,0 +1,21 @@
+version: "v1"
+project: "letschat"
+services:
+  frontend:
+    node:
+      domain: "letschat.sloppy.zone"
+      mem: $memory
+      image: "sloppy/apache-php"
+      instances: $instances
+      port: 80
+      env:
+        - LCB_DATABASE_URI: "mongodb://..."
+      volumes:
+        - path: "/var/www"
+        - path: "/var/test"
+  backend:
+    mongdb:
+      mem: 512
+      image: mongodb
+      instances: 1
+      port: 27017

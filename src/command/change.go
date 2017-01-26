@@ -16,14 +16,18 @@ import (
 // of a specific application on the fly.
 type ChangeCommand struct {
 	UI       ui.UI
-	Projects api.ProjectsUpdater
-	Apps     api.AppsUpdater
+	Projects interface {
+		api.ProjectsUpdater
+		api.ProjectsGetter
+		api.ProjectsCreater
+	}
+	Apps api.AppsUpdater
 }
 
 // Help should return long-form help text.
 func (c *ChangeCommand) Help() string {
 	helpText := `
-Usage: sloppy change [OPTIONS] (PROJECT/SERVICE/APP | PROJECT FILENAME)
+Usage: sloppy change [OPTIONS] (PROJECT/SERVICE/APP | [PROJECT] FILENAME)
 
   Sets the new values for the given app.
 
@@ -39,7 +43,7 @@ Options:
 Examples:
 
   sloppy change -m 128 letschat/frontend/apache
-  sloppy change -var=domain:abc.sloppy.zone letschat letschat.json
+  sloppy change -var=domain:abc.sloppy.zone letschat.json
 `
 	return strings.TrimSpace(helpText)
 }
@@ -167,16 +171,22 @@ func (c *ChangeCommand) updateProject(args []string) int {
 		return code
 	}
 
-	if cmdFlags.NArg() != 2 {
-		return c.UI.ErrorNotEnoughArgs("change", "", 2)
+	filename := cmdFlags.Arg(0)
+	var projectName string
+	if cmdFlags.NArg() == 2 {
+		c.UI.Warn("set project name explicitly is deprecated.")
+		projectName = cmdFlags.Arg(0)
+		filename = cmdFlags.Arg(1)
+	} else if cmdFlags.NArg() < 1 {
+		return c.UI.ErrorNotEnoughArgs("change", "", 1)
 	}
 
-	file, err := os.Open(cmdFlags.Arg(1))
+	file, err := os.Open(filename)
 	if err != nil {
 		if os.IsNotExist(err) {
-			c.UI.Error(fmt.Sprintf("file '%s' not found.", cmdFlags.Arg(1)))
+			c.UI.Error(fmt.Sprintf("file '%s' not found.", filename))
 		} else if os.IsPermission(err) {
-			c.UI.Error(fmt.Sprintf("no read permission '%s'.", cmdFlags.Arg(1)))
+			c.UI.Error(fmt.Sprintf("no read permission '%s'.", filename))
 		} else {
 			c.UI.Error(err.Error())
 		}
@@ -204,10 +214,22 @@ func (c *ChangeCommand) updateProject(args []string) int {
 		return 1
 	}
 
-	project, _, err := c.Projects.Update(cmdFlags.Arg(0), input)
-	if err != nil {
-		c.UI.ErrorAPI(err)
-		return 1
+	var project *api.Project
+	if projectName == "" {
+		projectName = *input.Name
+	}
+	if _, _, err := c.Projects.Get(projectName); err != nil {
+		project, _, err = c.Projects.Create(input)
+		if err != nil {
+			c.UI.ErrorAPI(err)
+			return 1
+		}
+	} else {
+		project, _, err = c.Projects.Update(projectName, input)
+		if err != nil {
+			c.UI.ErrorAPI(err)
+			return 1
+		}
 	}
 
 	c.UI.Table("show", project.Services)

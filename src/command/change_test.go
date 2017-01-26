@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/mitchellh/cli"
 	"github.com/sloppyio/cli/src/api"
 	"github.com/sloppyio/cli/src/ui"
-	"github.com/mitchellh/cli"
 )
 
 func TestChangeCommand_implements(t *testing.T) {
@@ -73,8 +73,7 @@ func TestChangeCommand_updateProject(t *testing.T) {
 		args := []string{
 			"-var=memory:1024",
 			"-var=instances:1",
-			"letschat",
-			"../../tests/files/testproject_variable." + tt.ext,
+			"../../tests/files/letschat_variable." + tt.ext,
 		}
 
 		testCodeAndOutput(t, mockUI, c.Run(args), 0, "frontend")
@@ -86,11 +85,26 @@ func TestChangeCommand_updateProjecIncorrectOrder(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	c := &ChangeCommand{UI: mockUI, Projects: projects}
 
+	args := []string{
+		"-var=memory:1024",
+		"-var=instances:1",
+		"../../tests/files/letschat_variable.json",
+		"letschat",
+	}
+
+	testCodeAndOutput(t, mockUI, c.Run(args), 1, "incorrect order of arguments")
+
+}
+
+func TestChangeCommand_updateProjectBackwardCompatibility(t *testing.T) {
+	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
+	projects := &mockProjectsEndpoint{}
+	c := &ChangeCommand{UI: mockUI, Projects: projects}
+
 	extTests := []struct {
 		ext string
 	}{
 		{ext: "json"},
-		{ext: "yaml"},
 		{ext: "yml"},
 	}
 
@@ -98,11 +112,11 @@ func TestChangeCommand_updateProjecIncorrectOrder(t *testing.T) {
 		args := []string{
 			"-var=memory:1024",
 			"-var=instances:1",
-			"../../tests/files/testproject_variable." + tt.ext,
 			"letschat",
+			"../../tests/files/letschat_variable." + tt.ext,
 		}
 
-		testCodeAndOutput(t, mockUI, c.Run(args), 1, "incorrect order of arguments")
+		testCodeAndOutput(t, mockUI, c.Run(args), 0, "frontend")
 	}
 }
 
@@ -140,7 +154,6 @@ func TestChangeCommand_flagsAfterArgument(t *testing.T) {
 	c := &ChangeCommand{UI: mockUI}
 
 	args := []string{
-		"letschat",
 		"../../tests/files/testproject_variable.json",
 		"--var=instances:1",
 		"--var=memory:1",
@@ -155,11 +168,41 @@ func TestChangeCommand_missingVariableValues(t *testing.T) {
 
 	args := []string{
 		"--var=instances:1",
-		"letschat",
 		"../../tests/files/testproject_variable.json",
 	}
 
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "missing variable 'memory'")
+}
+
+func TestChangeCommand_notFoundCreate(t *testing.T) {
+	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
+	apps := &mockAppsEndpoint{}
+	projects := &mockProjectsEndpoint{}
+	c := &ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
+
+	args := []string{
+		"--var=instances:1",
+		"--var=memory:1",
+		"../../tests/files/letschat_variable.json",
+	}
+
+	testCodeAndOutput(t, mockUI, c.Run(args), 0, "frontend")
+}
+
+func TestChangeCommand_notFoundCreateBackwardCompatibility(t *testing.T) {
+	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
+	apps := &mockAppsEndpoint{}
+	projects := &mockProjectsEndpoint{}
+	c := &ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
+
+	args := []string{
+		"--var=instances:1",
+		"--var=memory:1",
+		"letschat",
+		"../../tests/files/letschat_variable.json",
+	}
+
+	testCodeAndOutput(t, mockUI, c.Run(args), 0, "frontend")
 }
 
 func TestChangeCommand_notFound(t *testing.T) {
@@ -169,17 +212,6 @@ func TestChangeCommand_notFound(t *testing.T) {
 	c := &ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
 
 	args := []string{
-		"--var=instances:1",
-		"--var=memory:1",
-		"letschat1",
-		"../../tests/files/testproject_variable.json",
-	}
-
-	testCodeAndOutput(t, mockUI, c.Run(args), 1, "not be found")
-
-	mockUI.ErrorWriter.Reset()
-
-	args = []string{
 		"--i=1",
 		"letschat/frontend/apache1",
 	}
