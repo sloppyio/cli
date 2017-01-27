@@ -1,6 +1,6 @@
 # Changelog
 
-## Next version (Unreleased)
+## 1.6.0 (2017-01-27)
 + feat(update): add changelog uri
 + fix(version): set 5s timeout for http client
 + feat(decoder): allow users to escape variables
