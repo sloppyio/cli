@@ -7,6 +7,7 @@ __src="${__dir}/src"
 __scripts="${__dir}/scripts"
 __tests="${__dir}/tests"
 __bundles="${__dir}/bundles"
+__resources="${__dir}/.resources-windows"
 
 arg=${1:-}
 shift
