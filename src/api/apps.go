@@ -121,10 +121,11 @@ func (a *AppsEndpoint) Delete(project, service, app string, force bool) (*Status
 	}
 
 	// Add force parameter.
-	values := req.URL.Query()
-	values.Add("force", strconv.FormatBool(force))
-	req.URL.RawQuery = values.Encode()
-
+	if force {
+		values := req.URL.Query()
+		values.Add("force", strconv.FormatBool(force))
+		req.URL.RawQuery = values.Encode()
+	}
 	status := new(StatusResponse)
 	resp, err := a.client.Do(req, status)
 	if err != nil {

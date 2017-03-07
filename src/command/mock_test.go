@@ -74,7 +74,7 @@ func (m *mockProjectsEndpoint) Get(project string) (*api.Project, *http.Response
 	return result, nil, nil
 }
 
-func (m *mockProjectsEndpoint) Update(project string, input *api.Project) (*api.Project, *http.Response, error) {
+func (m *mockProjectsEndpoint) Update(project string, input *api.Project, force bool) (*api.Project, *http.Response, error) {
 	if project != "letschat" {
 		return nil, nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Project with id \"%s\" could not be found", project), "")
 	}

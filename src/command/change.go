@@ -39,6 +39,7 @@ Options:
   -d, --domain          the new domain name the app should use
   -e, --env=[]          set environment variables
   -v, --var=[]          values to set for placeholders
+  -f, --force           set force flag
 
 Examples:
 
@@ -147,9 +148,12 @@ func (c *ChangeCommand) updateApp(args []string) int {
 // Updates an entire project
 func (c *ChangeCommand) updateProject(args []string) int {
 	var vars stringMap
+	var force bool
 	cmdFlags := newFlagSet("change", flag.ContinueOnError)
 	cmdFlags.Var(&vars, "var", "")
 	cmdFlags.Var(&vars, "v", "")
+	cmdFlags.BoolVar(&force, "f", false, "")
+	cmdFlags.BoolVar(&force, "force", false, "")
 
 	if err := cmdFlags.Parse(args); err != nil {
 		c.UI.Error(err.Error())
@@ -225,7 +229,7 @@ func (c *ChangeCommand) updateProject(args []string) int {
 			return 1
 		}
 	} else {
-		project, _, err = c.Projects.Update(projectName, input)
+		project, _, err = c.Projects.Update(projectName, input, force)
 		if err != nil {
 			c.UI.ErrorAPI(err)
 			return 1

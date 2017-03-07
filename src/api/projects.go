@@ -78,7 +78,7 @@ func (p *ProjectsEndpoint) Create(input *Project) (*Project, *http.Response, err
 }
 
 // Update changes a sloppy project.
-func (p *ProjectsEndpoint) Update(name string, input *Project) (*Project, *http.Response, error) {
+func (p *ProjectsEndpoint) Update(name string, input *Project, force bool) (*Project, *http.Response, error) {
 	if err := ValidateProject(input); err != nil {
 		return nil, nil, err
 	}
@@ -87,6 +87,13 @@ func (p *ProjectsEndpoint) Update(name string, input *Project) (*Project, *http.
 	req, err := p.client.NewRequest("PUT", u, input)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// Add force parameter.
+	if force {
+		values := req.URL.Query()
+		values.Add("force", strconv.FormatBool(force))
+		req.URL.RawQuery = values.Encode()
 	}
 
 	project := new(Project)
@@ -173,7 +180,7 @@ type ProjectsGetLister interface {
 
 // ProjectsUpdater is an interface which provides the update method.
 type ProjectsUpdater interface {
-	Update(name string, input *Project) (*Project, *http.Response, error)
+	Update(name string, input *Project, force bool) (*Project, *http.Response, error)
 }
 
 // ProjectsDeleter is an interface which provides the delete method.

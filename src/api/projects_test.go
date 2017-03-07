@@ -108,6 +108,10 @@ func TestProjectsUpdate(t *testing.T) {
 			t.Errorf("Returned unexpected error: %v", err)
 		}
 
+		if r.URL.Query().Get("force") != "" {
+			t.Errorf("Expect force flag to be false, got %v", r.URL.Query().Get("force"))
+		}
+
 		json.NewEncoder(w).Encode(newStatusResponse(project))
 	})
 
@@ -128,7 +132,48 @@ func TestProjectsUpdate(t *testing.T) {
 		},
 	}
 
-	proj, _, _ := client.Projects.Update("letschat", project)
+	proj, _, _ := client.Projects.Update("letschat", project, false)
+	if !reflect.DeepEqual(proj, project) {
+		t.Errorf("Update(%v) = %+v, want %+v", project, proj, project)
+	}
+}
+
+func TestProjectsUpdate_forceFlag(t *testing.T) {
+	setup()
+	defer teardown()
+
+	mux.HandleFunc("/apps/letschat", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		project := new(Project)
+		if err := json.NewDecoder(r.Body).Decode(project); err != nil {
+			t.Errorf("Returned unexpected error: %v", err)
+		}
+
+		if r.URL.Query().Get("force") != "true" {
+			t.Errorf("Expect force flag to be true, got %v", r.URL.Query().Get("force"))
+		}
+
+		json.NewEncoder(w).Encode(newStatusResponse(project))
+	})
+
+	project := &Project{
+		Name: String("letschat"),
+		Services: []*Service{
+			{
+				ID: String("frontend"),
+				Apps: []*App{
+					{
+						ID:        String("apache"),
+						Memory:    Int(512),
+						Instances: Int(2),
+						Image:     String("wordpress"),
+					},
+				},
+			},
+		},
+	}
+
+	proj, _, _ := client.Projects.Update("letschat", project, true)
 	if !reflect.DeepEqual(proj, project) {
 		t.Errorf("Update(%v) = %+v, want %+v", project, proj, project)
 	}
@@ -138,7 +183,7 @@ func TestProjectsUpdate_validate(t *testing.T) {
 	setup()
 	defer teardown()
 
-	_, _, err := client.Projects.Update("letschat", nil)
+	_, _, err := client.Projects.Update("letschat", nil, false)
 	if err == nil {
 		t.Error("Expected error to be returned")
 	}
@@ -256,7 +301,7 @@ func TestProjectURLParseErrors(t *testing.T) {
 		},
 		{
 			call: func() error {
-				_, _, err := client.Projects.Update("%", testProject)
+				_, _, err := client.Projects.Update("%", testProject, false)
 				return err
 			},
 		},
@@ -318,7 +363,7 @@ func TestProjectsServerErrors(t *testing.T) {
 			method: "PUT",
 			err:    newErrorResponse(nil, "something happend", ""),
 			call: func() (*http.Response, error) {
-				_, resp, err := client.Projects.Update("letschat", testProject)
+				_, resp, err := client.Projects.Update("letschat", testProject, false)
 				return resp, err
 			},
 		},
