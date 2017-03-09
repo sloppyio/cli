@@ -1,7 +1,8 @@
 # Changelog
 
-## Next version (Unreleased)
+## 1.7.0 (2017-03-09)
 + chore(windows): add version-information resource
++ feat(projects): introduce force flag
 
 ## 1.6.0 (2017-01-27)
 + feat(update): add changelog uri
