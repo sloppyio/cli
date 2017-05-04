@@ -304,10 +304,13 @@ func (p *project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 									Options: make(map[string]string),
 								}
 								if m, ok := thirdLevel.Value.(yaml.MapSlice); ok {
-									for _, mapItem := range m {
+									for i, mapItem := range m {
 										if key, ok := mapItem.Key.(string); ok {
 											if key == keyDriver {
-												value, _ := mapItem.Value.(string)
+												value, ok := mapItem.Value.(string)
+												if !ok {
+													return &yamlError{namespace: id, key: parameter, index: i, message: "expected to be a string"}
+												}
 												logging.Driver = api.String(value)
 											} else {
 												if mapSlice, ok := mapItem.Value.(yaml.MapSlice); ok {
