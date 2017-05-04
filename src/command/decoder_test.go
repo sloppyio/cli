@@ -248,6 +248,12 @@ func TestDecodeYAML(t *testing.T) {
 								GracePeriod:          api.Int(3),
 							},
 						},
+						Logging: &api.Logging{
+							Driver: api.String("syslog"),
+							Options: map[string]string{
+								"syslog-address": "tcp://192.168.0.42:123",
+							},
+						},
 					},
 				},
 			},
@@ -255,7 +261,7 @@ func TestDecodeYAML(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(input, want) {
-		t.Errorf("App = %+v, want %+v", input, want)
+		t.Errorf("\nApp:\t%+v\nWant:\t%+v\n", input, want)
 	}
 }
 
@@ -700,6 +706,10 @@ services:
           interval_seconds: 10
           max_consecutive_failures: 3
           grace_period_seconds: 3
+      logging:
+        driver: syslog
+        options:
+          syslog-address: "tcp://192.168.0.42:123"
 `
 
 var testMinimalYAMLInput = `version: "v1"
