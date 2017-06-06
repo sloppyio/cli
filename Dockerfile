@@ -1,4 +1,4 @@
-FROM golang:1.8-wheezy
+FROM golang:1.8.3
 
 ENV JQ_VERSION 1.5
 ENV JQ_DOWNLOAD_URL https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/jq-linux32
