@@ -295,7 +295,47 @@ func (p *project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 							default:
 								return &yamlError{namespace: id, key: parameter, message: "needs to be either an object or an array"}
 							}
+						case "logging":
+							const keyDriver = "driver"
+							m, ok := thirdLevel.Value.(yaml.MapSlice)
+							if !ok {
+								return &yamlError{namespace: id, key: parameter, message: "expected to be a logging object"}
+							}
 
+							logging := &api.Logging{
+								Options: make(map[string]string),
+							}
+
+							for i, mapItem := range m {
+								key, ok := mapItem.Key.(string)
+								if !ok {
+									return &yamlError{namespace: id, key: parameter, index: i, message: "key needs to be a string"}
+								}
+								if key == keyDriver {
+									value, ok := mapItem.Value.(string)
+									if !ok {
+										return &yamlError{namespace: id, key: parameter, index: i, message: "value needs to be a string"}
+									}
+									logging.Driver = api.String(value)
+								} else {
+									mapSlice, ok := mapItem.Value.(yaml.MapSlice)
+									if !ok {
+										return &yamlError{namespace: id, key: parameter, index: i, message: "expected to be a object"}
+									}
+									for idx, item := range mapSlice {
+										k, ok := item.Key.(string)
+										if !ok {
+											return &yamlError{namespace: id, key: parameter, index: idx, message: "key needs to be a string"}
+										}
+										v, ok := item.Value.(string)
+										if !ok {
+											return &yamlError{namespace: id, key: parameter, index: idx, message: "value needs to be a string"}
+										}
+										logging.Options[k] = v
+									}
+								}
+							}
+							app.Logging = logging
 						default:
 							return &yamlError{namespace: id, key: parameter, message: "key is not supported"}
 						}

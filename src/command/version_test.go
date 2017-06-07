@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sloppyio/cli/src/ui"
 	"github.com/mitchellh/cli"
+	"github.com/sloppyio/cli/src/ui"
 )
 
 func TestVersionCommand_implements(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sloppyio/cli/src/ui"
 	"github.com/mitchellh/cli"
+	"github.com/sloppyio/cli/src/ui"
 )
 
 func TestRestartCommand_implements(t *testing.T) {

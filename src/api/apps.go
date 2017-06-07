@@ -29,6 +29,7 @@ type App struct {
 	EnvVars      map[string]string `json:"env,omitempty"`
 	Volumes      []*Volume         `json:"volumes,omitempty"`
 	HealthChecks []*HealthCheck    `json:"health_checks,omitempty"`
+	Logging      *Logging          `json:"logging,omitempty"`
 }
 
 func (a *App) String() string {
@@ -59,6 +60,12 @@ type HealthCheck struct {
 type Volume struct {
 	Path *string `json:"container_path,omitempty"`
 	Size *string `json:"size,omitempty"`
+}
+
+// Logging represents a sloppy app logging configuration.
+type Logging struct {
+	Driver  *string           `json:"driver,omitempty"`
+	Options map[string]string `json:"options,omitempty"`
 }
 
 // List returns apps of a given project and service.

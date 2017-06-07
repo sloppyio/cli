@@ -191,6 +191,24 @@ func listApp(w io.Writer, app *api.App) {
 		fmt.Fprintf(&buf, "\t\t %d\n", *value.Port)
 	}
 
+	if app.Logging != nil {
+		fmt.Fprintf(&buf, "Logging:\n")
+		if app.Logging.Driver != nil {
+			fmt.Fprintf(&buf, "  Driver:\t %s\n", *app.Logging.Driver)
+		} else {
+			fmt.Fprintf(&buf, "  Driver:\t -\n")
+		}
+		first := true
+		for k, v := range app.Logging.Options {
+			if first {
+				fmt.Fprintf(&buf, "  Options:\t %s=%q\n", k, v)
+				first = false
+			} else {
+				fmt.Fprintf(&buf, "\t\t %s=%q\n", k, v)
+			}
+		}
+	}
+
 	listing(&buf, "Dependencies", "\t", "\t\t", app.Dependencies)
 
 	if len(app.EnvVars) == 0 {
