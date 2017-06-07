@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.8.0 (2017-06-07)
++ feat(logging): configure external logging service
+
 ## 1.7.0 (2017-03-09)
 + chore(windows): add version-information resource
 + feat(projects): introduce force flag
