@@ -37,7 +37,7 @@ if [ "${output}" != "sloppy" ]; then
     [ ! -z $BUILD_VERSION_SUFFIX ] && defs="$defs -D BUILD_VERSION=\"$BUILD_VERSION_SUFFIX\""
 	  [ ! -z $BUILD_VERSION_COMMA ]  && defs="$defs -D BUILD_VERSION_COMMA=$BUILD_VERSION_COMMA"
 
-    x86_64-w64-mingw32-windres \
+    /usr/bin/x86_64-w64-mingw32-windres \
       -i "${__resources}/sloppy.rc" \
       -F pe-x86-64 \
       -o "${__src}/rsrc_amd64.syso" \
