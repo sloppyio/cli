@@ -34,7 +34,7 @@ func checkVersion() (bool, string) {
 		fmt.Fprintln(w, "A newer version of this runtime is available")
 		fmt.Fprintf(w, "Server has version %s\n", deployedVersion)
 		fmt.Fprintf(w, "User has version %s\n", Version)
-		fmt.Fprint(w, "Check https://support.sloppy.io for install/update instructions and ")
+		fmt.Fprint(w, "Check https://sloppy.io/knowledge-base/install-cli/ for install/update instructions and ")
 		fmt.Fprintln(w, "https://github.com/sloppyio/cli/blob/master/CHANGELOG.md for the changelog")
 
 		// Truncate file to force update request
