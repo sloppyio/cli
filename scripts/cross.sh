@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-source "${__scripts}/dependencies.sh"
-
 echo "Start cross-compiling sloppy"
 echo
 for GOOS in darwin linux windows; do

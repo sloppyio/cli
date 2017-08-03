@@ -28,8 +28,7 @@ DOCKER_RUN_DOCKER := $(DOCKER_FLAGS) "$(DOCKER_IMAGE)"
 
 default: cross
 
-local: _deps
-	scripts/make.sh build
+local: scripts/make.sh build
 
 cross: bundle
 	$(DOCKER_RUN_DOCKER) scripts/make.sh cross release
@@ -60,6 +59,3 @@ bundle:
 
 clean:
 	rm -rf bundles
-
-_deps:
-	scripts/make.sh deps

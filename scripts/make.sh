@@ -13,11 +13,7 @@ arg=${1:-}
 shift
 
 case $arg in
-"deps")
-  source "${__scripts}/dependencies.sh"
-  ;;
 "build")
-  source "${__scripts}/dependencies.sh"
   source "${__scripts}/compile.sh"
   ;;
 "cross")

@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-source "${__scripts}/dependencies.sh"
-
 echo "Start unit tests"
 go test -v ./...
 if [ $? == 0 ]; then
