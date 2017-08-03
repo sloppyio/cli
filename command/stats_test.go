@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/mitchellh/cli"
-	"github.com/sloppyio/cli/src/ui"
+	"github.com/sloppyio/cli/ui"
 )
 
 func TestStatsCommand_implements(t *testing.T) {

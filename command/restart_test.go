@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/mitchellh/cli"
-	"github.com/sloppyio/cli/src/ui"
+	"github.com/sloppyio/cli/ui"
 )
 
 func TestRestartCommand_implements(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/mitchellh/cli"
-	"github.com/sloppyio/cli/src/ui"
+	"github.com/sloppyio/cli/ui"
 )
 
 func TestStartCommand_implements(t *testing.T) {
@@ -38,7 +38,7 @@ func TestStartCommand(t *testing.T) {
 		args := []string{
 			"-v", "memory:128",
 			"-var=instances:1",
-			"../../tests/files/testproject_variable." + tt.ext,
+			"testdata/testproject_variable." + tt.ext,
 		}
 		testCodeAndOutput(t, mockUI, c.Run(args), 0, "")
 	}
@@ -51,7 +51,7 @@ func TestStartCommand_oneVarsFlag(t *testing.T) {
 
 	args := []string{
 		"--var=memory:128,instances:1",
-		"../../tests/files/testproject_variable.json",
+		"testdata/testproject_variable.json",
 	}
 
 	testCodeAndOutput(t, mockUI, c.Run(args), 0, "")
@@ -101,7 +101,7 @@ func TestStartCommand_missingVariableValues(t *testing.T) {
 
 	args := []string{
 		"--var=instances:1",
-		"../../tests/files/testproject_variable.json",
+		"testdata/testproject_variable.json",
 	}
 
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "missing variable 'memory'")
@@ -112,7 +112,7 @@ func TestStartCommand_flagsAfterArgument(t *testing.T) {
 	c := &StartCommand{UI: mockUI}
 
 	args := []string{
-		"../../tests/files/testproject_variable.json",
+		"testdata/testproject_variable.json",
 		"--var=instances:1",
 	}
 
@@ -125,7 +125,7 @@ func TestStartCommand_invalidInputParameter(t *testing.T) {
 	c := &StartCommand{UI: mockUI, Projects: projects}
 
 	args := []string{
-		"../../tests/files/testproject_invalid.json",
+		"testdata/testproject_invalid.json",
 	}
 
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "missing the required")
@@ -137,7 +137,7 @@ func TestStartCommand_invalidJSON(t *testing.T) {
 	c := &StartCommand{UI: mockUI, Projects: projects}
 
 	args := []string{
-		"../../tests/files/testproject_invalidjson.json",
+		"testdata/testproject_invalidjson.json",
 	}
 
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "syntax error around line 13:21")

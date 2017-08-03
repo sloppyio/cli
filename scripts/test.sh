@@ -2,7 +2,7 @@
 set -e
 
 echo "Start unit tests"
-go test -v ./...
+go test -v -race -timeout 30s ./cmd ./command ./pkg/... ./ui
 if [ $? == 0 ]; then
   echo "==> Successfully"
 fi

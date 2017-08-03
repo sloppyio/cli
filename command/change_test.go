@@ -74,7 +74,7 @@ func TestChangeCommand_updateProject(t *testing.T) {
 		args := []string{
 			"-var=memory:1024",
 			"-var=instances:1",
-			"../../tests/files/letschat_variable." + tt.ext,
+			"testdata/letschat_variable." + tt.ext,
 		}
 
 		testCodeAndOutput(t, mockUI, c.Run(args), 0, "frontend")
@@ -89,7 +89,7 @@ func TestChangeCommand_updateProjecIncorrectOrder(t *testing.T) {
 	args := []string{
 		"-var=memory:1024",
 		"-var=instances:1",
-		"../../tests/files/letschat_variable.json",
+		"testdata/letschat_variable.json",
 		"letschat",
 	}
 
@@ -114,7 +114,7 @@ func TestChangeCommand_updateProjectBackwardCompatibility(t *testing.T) {
 			"-var=memory:1024",
 			"-var=instances:1",
 			"letschat",
-			"../../tests/files/letschat_variable." + tt.ext,
+			"testdata/letschat_variable." + tt.ext,
 		}
 
 		testCodeAndOutput(t, mockUI, c.Run(args), 0, "frontend")
@@ -155,7 +155,7 @@ func TestChangeCommand_flagsAfterArgument(t *testing.T) {
 	c := &ChangeCommand{UI: mockUI}
 
 	args := []string{
-		"../../tests/files/testproject_variable.json",
+		"testdata/testproject_variable.json",
 		"--var=instances:1",
 		"--var=memory:1",
 	}
@@ -169,7 +169,7 @@ func TestChangeCommand_missingVariableValues(t *testing.T) {
 
 	args := []string{
 		"--var=instances:1",
-		"../../tests/files/testproject_variable.json",
+		"testdata/testproject_variable.json",
 	}
 
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "missing variable 'memory'")
@@ -184,7 +184,7 @@ func TestChangeCommand_notFoundCreate(t *testing.T) {
 	args := []string{
 		"--var=instances:1",
 		"--var=memory:1",
-		"../../tests/files/letschat_variable.json",
+		"testdata/letschat_variable.json",
 	}
 
 	testCodeAndOutput(t, mockUI, c.Run(args), 0, "frontend")
@@ -200,7 +200,7 @@ func TestChangeCommand_notFoundCreateBackwardCompatibility(t *testing.T) {
 		"--var=instances:1",
 		"--var=memory:1",
 		"letschat",
-		"../../tests/files/letschat_variable.json",
+		"testdata/letschat_variable.json",
 	}
 
 	testCodeAndOutput(t, mockUI, c.Run(args), 0, "frontend")
