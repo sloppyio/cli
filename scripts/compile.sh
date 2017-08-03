@@ -47,18 +47,19 @@ if [ "${output}" != "sloppy" ]; then
   fi
 fi
 
+VERSION_NAMESPACE="github.com/sloppyio/cli/command"
 echo "Start compiling sloppy ${BUILD_VERSION} for ${GOOS}-${GOARCH}"
 go build \
-  -ldflags \
-    "-X main.GitCommit=${GIT_COMMIT} \
-    -X main.Version=${BUILD_VERSION} \
-    -X main.VersionPrerelease=${BUILD_PRE_RELEASE}" \
+  -ldflags "\
+    -X ${VERSION_NAMESPACE}.GitCommit=${GIT_COMMIT} \
+    -X ${VERSION_NAMESPACE}.Version=${BUILD_VERSION} \
+    -X ${VERSION_NAMESPACE}.VersionPreRelease=${BUILD_PRE_RELEASE}" \
   ${trim_flags:-} \
   -o "${BUILD_TARGET}/${output:-sloppy}" \
-  "./src"
+  "./cmd"
 
 # Cleanup
-if [ $GOOS = "windows" ]; then
+if [ ${GOOS} = "windows" ]; then
   rm "${__src}/rsrc_amd64.syso"
 fi
 
