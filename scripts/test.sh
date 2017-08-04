@@ -2,7 +2,17 @@
 set -e
 
 echo "Start unit tests"
-go test -v -race -timeout 30s ./cmd ./command ./pkg/... ./ui
+
+# Running per package for race and coverage option
+# Ensures not to test the vendor directory too
+packages=$(go list ./... | grep -h -v "/vendor/")
+for pkg in ${packages}; do
+    go test -v -race -timeout 30s -covermode=count -coverprofile=$(basename ${pkg}).cover ${pkg}
+done
+# Generate cover profile
+echo "mode: count" > ./coverage.txt
+grep -h -v "^mode:" ./*.cover >> ./coverage.txt && rm ./*.cover
+
 if [ $? == 0 ]; then
   echo "==> Successfully"
 fi
