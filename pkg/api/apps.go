@@ -32,6 +32,16 @@ type App struct {
 	Logging      *Logging          `json:"logging,omitempty"`
 }
 
+// Returns the count how often the given status was found
+func (a *App) StatusCount(s string) (n int) {
+	for _, status := range a.Status {
+		if status == s {
+			n++
+		}
+	}
+	return n
+}
+
 func (a *App) String() string {
 	return Stringify(a)
 }

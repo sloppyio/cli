@@ -18,7 +18,7 @@ func (s *stringMap) Get() interface{} { return stringMap(*s) }
 
 func (s *stringMap) Set(value string) error {
 	if (*s) == nil {
-		(*s) = make(stringMap)
+		*s = make(stringMap)
 	}
 
 	// Backwards compatibility

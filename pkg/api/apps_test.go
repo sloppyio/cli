@@ -256,7 +256,7 @@ func TestAppsGetMetrics(t *testing.T) {
 	want := Metrics{
 		"container_memory_usage_bytes": Series{
 			"USERNAME-letschat_backend_mongodb.59f7edf4-82ff-11e5-8ac1-56847afe9799": DataPoints{
-				&Point{
+				&DataPoint{
 					X: Timestamp{time.Date(2015, 11, 4, 14, 17, 19, 0, time.UTC)},
 					Y: Float64(31244288),
 				},

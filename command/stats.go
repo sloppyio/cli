@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -20,6 +21,7 @@ type StatsCommand struct {
 	UI       ui.UI
 	Projects api.ProjectsGetter
 	Apps     api.AppsGetMetricer
+	showAll  bool
 }
 
 // Help should return long-form help text.
@@ -42,11 +44,9 @@ Examples:
 // Run should run the actual command with the given CLI instance and
 // command-line args.
 func (c *StatsCommand) Run(args []string) int {
-	var all bool
 	cmdFlags := newFlagSet("stats", flag.ContinueOnError)
-	cmdFlags.BoolVar(&all, "a", false, "")
-	cmdFlags.BoolVar(&all, "all", false, "")
-
+	cmdFlags.BoolVar(&c.showAll, "a", false, "")
+	cmdFlags.BoolVar(&c.showAll, "all", false, "")
 	if err := cmdFlags.Parse(args); err != nil {
 		c.UI.Error(err.Error())
 		c.UI.Output("See 'sloppy stats --help'.")
@@ -68,7 +68,7 @@ func (c *StatsCommand) Run(args []string) int {
 		return 1
 	}
 
-	stats, err := c.collect(project, all)
+	stats, err := c.collect(project)
 	if err != nil {
 		c.UI.ErrorAPI(err)
 		return 1
@@ -82,7 +82,7 @@ func (c *StatsCommand) Run(args []string) int {
 	var buf bytes.Buffer
 	w := new(tabwriter.Writer)
 	w.Init(&buf, 0, 8, 0, '\t', 0)
-	fmt.Fprintf(w, "CONTAINER \t MEM / LIMIT \t MEM %% \t NET I/O Extern \t NET I/O Intern \t MAX VOLUME %% \t LAST UPDATE \n")
+	fmt.Fprintf(w, "CONTAINER \t CPU %% \t MEM / LIMIT \t MEM %% \t NET I/O Extern \t NET I/O Intern \t MAX VOLUME %% \t LAST UPDATE \n")
 
 	var keys []string
 	var latest api.Timestamp
@@ -94,7 +94,7 @@ func (c *StatsCommand) Run(args []string) int {
 
 	for k := range stats {
 		diff := latest.Time.Sub(stats[k].Time.Time)
-		if (diff < 5*time.Second && diff > -5*time.Second) || all {
+		if (diff < 5*time.Second && diff > -5*time.Second) || c.showAll {
 			keys = append(keys, k)
 		}
 	}
@@ -118,23 +118,25 @@ func (c *StatsCommand) Synopsis() string {
 
 // Stat represents a container's stats
 type stat struct {
-	Service           string
 	App               string
+	Service           string
 	Time              api.Timestamp
-	ID                string // Container
+	ID                string  // Container
+	CPU               float64 // CPUPercentage
 	Memory            float64
 	MemoryLimit       float64
 	InternalNetworkRx float64
 	InternalNetworkTx float64
 	ExternalNetworkRx float64
 	ExternalNetworkTx float64
-	Volumes           int
-	Volume            float64
+	Volumes           int     // VolumeCount
+	Volume            float64 // VolumePercentage
 }
 
-func (s stat) String() string {
-	return fmt.Sprintf("%s/%s-%s \t %s / %.f MiB \t %.1f%% \t %s / %s \t %s / %s \t %.1f%% \t %s",
+func (s *stat) String() string {
+	return fmt.Sprintf("%s/%s-%s \t %.1f%% \t %s / %.f MiB \t %.1f%% \t %s / %s \t %s / %s \t %.1f%% \t %s",
 		s.Service, s.App, s.ID[:6],
+		s.CPU,
 		humanByte(s.Memory), s.MemoryLimit,
 		float64(s.Memory/(1<<20))/float64(s.MemoryLimit)*100,
 		humanByte(s.ExternalNetworkRx), humanByte(s.ExternalNetworkTx),
@@ -144,125 +146,166 @@ func (s stat) String() string {
 	)
 }
 
-// Collect collects all statistics and merge them
-func (c *StatsCommand) collect(project *api.Project, all bool) (map[string]*stat, error) {
-	stats := make(map[string]*stat)
-	var wg sync.WaitGroup
-	var mutex sync.Mutex
-
-	for _, service := range project.Services {
-		wg.Add(len(service.Apps))
-		for _, app := range service.Apps {
-			statusCount := 0
-			if !all {
-				for i := range app.Status {
-					if app.Status[i] == "running" {
-						statusCount++
-					}
-				}
-				if statusCount == 0 {
-					wg.Done()
-					continue
-				}
-			}
-
-			go func(project *api.Project, service *api.Service, app *api.App) {
-				defer wg.Done()
-				metrics, _, err := c.Apps.GetMetrics(*project.Name, *service.ID, *app.ID)
-				if err != nil {
-					return
-				}
-
-				blueprint := stat{
-					Service:     *service.ID,
-					App:         *app.ID,
-					MemoryLimit: float64(*app.Memory),
-					Volumes:     len(app.Volumes),
-				}
-
-				// Sort keys in order to assign volume stats to the right container because go is accessing maps randomly.
-				var keys []string
-				for name := range metrics {
-					keys = append(keys, name)
-				}
-				sort.Strings(keys)
-
-				mutex.Lock()
-				{
-					for _, metric := range keys {
-						switch metric {
-						case "container_memory_usage_bytes":
-							setMemory := func(s *stat, name string, p api.Point) {
-								s.Memory = *p.Y
-							}
-							blueprint.SetMetrics(stats, metrics[metric], setMemory)
-						case "container_volume_usage_percentage":
-							setVolume := func(s *stat, name string, p api.Point) {
-								// Only set if maximum
-								if *p.Y > s.Volume {
-									s.Volume = *p.Y
-								}
-							}
-							blueprint.SetMetrics(stats, metrics[metric], setVolume)
-						case "container_network_receive_bytes_per_second":
-							setNetworkRx := func(s *stat, name string, p api.Point) {
-								if i := strings.LastIndex(name, "eth0"); i != -1 {
-									s.ExternalNetworkRx = *p.Y
-								}
-								if i := strings.LastIndex(name, "ethwe"); i != -1 {
-									s.InternalNetworkRx = *p.Y
-								}
-							}
-							blueprint.SetMetrics(stats, metrics[metric], setNetworkRx)
-						case "container_network_transmit_bytes_per_second":
-							setNetworkTx := func(s *stat, name string, p api.Point) {
-								if i := strings.LastIndex(name, "eth0"); i != -1 {
-									s.ExternalNetworkTx = *p.Y
-								}
-								if i := strings.LastIndex(name, "ethwe"); i != -1 {
-									s.InternalNetworkTx = *p.Y
-								}
-							}
-							blueprint.SetMetrics(stats, metrics[metric], setNetworkTx)
-						}
-					}
-				}
-				mutex.Unlock()
-
-			}(project, service, app)
-		}
-	}
-	wg.Wait()
-	return stats, nil
+type Metric struct {
+	app        *api.App
+	metricName string
+	service    string
+	seriesName string
+	time       time.Time
+	value      float64
 }
 
-func (s *stat) SetMetrics(stats map[string]*stat, series api.Series, set func(*stat, string, api.Point)) {
-	for name, values := range series {
-		if value := values[len(values)-1]; value.Y != nil {
-			var id string
-			i := strings.Index(name, ".") + 1
+type Metrics []*Metric
 
-			if strings.Contains(name, "/") {
-				for idstats := range stats {
-					if s.Volumes > 0 && s.App == stats[idstats].App && s.Service == stats[idstats].Service {
-						id = idstats
-						set(stats[id], name, *value)
-					}
-				}
+type MetricFetchResult struct {
+	app     *api.App
+	service string
+	metrics api.Metrics
+	err     error
+}
+
+func (m Metrics) Len() int { return len(m) }
+// Volume metrics needs to be the last one due to their missing uuid
+func (m Metrics) Less(i, j int) bool { return strings.Contains(m[j].metricName, "volume") }
+func (m Metrics) Swap(i, j int)      { m[i], m[j] = m[j], m[i] }
+
+// Collect collects all statistics from all running apps, aggregate and merge them.
+func (c *StatsCommand) collect(project *api.Project) (map[string]*stat, error) {
+	quit := make(chan struct{})
+	defer close(quit)
+
+	var errors []error
+	var result Metrics
+
+	for r := range c.fetchAll(project, quit) {
+		if r.err != nil {
+			switch r.err.(type) {
+			// This type of error was ignored in previous implementation.
+			// However, this implementation does not handling multiple API
+			// error responses in general.
+			// TODO api errors should be handled downstream
+			case *api.ErrorResponse:
+				c.UI.ErrorAPI(r.err)
+			default:
+				errors = append(errors, r.err)
+			}
+			continue
+		}
+		result = append(result, c.toMetricSlice(r.app, r.service, r.metrics)...)
+	}
+
+	if len(errors) > 0 {
+		return nil, errors[0]
+	}
+	return c.aggregate(result)
+}
+
+func (c *StatsCommand) fetchAll(project *api.Project, quit chan struct{}) <-chan MetricFetchResult {
+	results := make(chan MetricFetchResult)
+	wg := sync.WaitGroup{}
+	for _, service := range project.Services {
+		for _, app := range service.Apps {
+			if !c.showAll && app.StatusCount("running") == 0 {
 				continue
 			}
 
-			id = name[i : i+36]
-
-			if stats[id] == nil {
-				clone := *s
-				clone.ID = id
-				clone.Time = value.X
-				stats[id] = &clone
-			}
-			set(stats[id], name, *value)
+			wg.Add(1)
+			go func(app *api.App, name, service string) {
+				metrics, _, err := c.Apps.GetMetrics(name, service, *app.ID)
+				r := MetricFetchResult{app, service, metrics, err}
+				select {
+				case results <- r:
+				case <-quit:
+				}
+				wg.Done()
+			}(app, *project.Name, *service.ID)
 		}
 	}
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+	return results
+}
+
+func (c *StatsCommand) aggregate(metrics []*Metric) (map[string]*stat, error) {
+	stats := make(map[string]*stat)
+	regex := regexp.MustCompile(`^(\w+)-(\w+).([a-z0-9-]{36}|([a-z/+]+)$)`)
+	var id string
+	p := &stat{}
+	for _, metric := range metrics {
+		matches := regex.FindStringSubmatch(metric.seriesName)
+		if len(matches) == 0 || len(matches) < 3 {
+			return nil, fmt.Errorf("invalid metric series name %q", metric.metricName)
+		}
+		uuid := matches[3]
+		// Volume metrics does not contain a uuid, use the previous one
+		if !strings.Contains(metric.metricName, "volume") {
+			id = uuid
+		}
+
+		s := &stat{
+			App:               *metric.app.ID,
+			Service:           metric.service,
+			Time:              api.Timestamp{Time: metric.time},
+			ID:                id,
+			MemoryLimit:       float64(*metric.app.Memory),
+			Volumes:           len(metric.app.Volumes),
+			CPU:               p.CPU,
+			Memory:            p.Memory,
+			ExternalNetworkRx: p.ExternalNetworkRx,
+			InternalNetworkRx: p.InternalNetworkRx,
+			ExternalNetworkTx: p.ExternalNetworkTx,
+			InternalNetworkTx: p.InternalNetworkTx,
+			Volume:            p.Volume,
+		}
+
+		switch metric.metricName {
+		case "container_cpu_usage_percentage":
+			s.CPU = metric.value
+		case "container_memory_usage_bytes":
+			s.Memory = metric.value
+		case "container_network_receive_bytes_per_second":
+			if strings.HasSuffix(metric.seriesName, "eth0") {
+				s.ExternalNetworkRx = metric.value
+				break
+			}
+			s.InternalNetworkRx = metric.value
+		case "container_network_transmit_bytes_per_second":
+			if strings.HasSuffix(metric.seriesName, "eth0") {
+				s.ExternalNetworkTx = metric.value
+				break
+			}
+			s.InternalNetworkTx = metric.value
+		case "container_volume_usage_percentage":
+			if s.Volumes > 0 && metric.value > s.Volume {
+				s.Volume = metric.value
+			}
+		}
+		stats[id] = s
+		p = s // merge next with previous one
+	}
+	return stats, nil
+}
+
+func (c *StatsCommand) toMetricSlice(app *api.App, serviceId string, metrics api.Metrics) Metrics {
+	result := make(Metrics, 0)
+	for metricName, series := range metrics {
+		for seriesName, dataPoints := range series {
+			for _, dataPoint := range dataPoints {
+				result = append(result, &Metric{
+					app:        app,
+					metricName: metricName,
+					service:    serviceId,
+					seriesName: seriesName,
+					time:       dataPoint.X.Time,
+					value:      *dataPoint.Y,
+				})
+			}
+		}
+	}
+	sort.Sort(result)
+	return result
 }
 
 // HumanByte returns a human-readable size.

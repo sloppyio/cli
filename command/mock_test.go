@@ -280,43 +280,43 @@ func (m *mockAppsEndpoint) GetMetrics(project, service, app string) (api.Metrics
 
 	result := api.Metrics{
 		"container_memory_usage_bytes": api.Series{
-			"USERNAME-letschat_frontend_node.59f7edf4-82ff-11e5-8ac1-56847afe9799": api.DataPoints{0: &api.Point{
+			"USERNAME-letschat_frontend_node.59f7edf4-82ff-11e5-8ac1-56847afe9799": api.DataPoints{0: &api.DataPoint{
 				X: api.Timestamp{Time: time.Date(2015, 11, 4, 14, 17, 19, 0, time.UTC)},
 				Y: api.Float64(134217728),
 			},
 			},
 		},
 		"container_volume_usage_percentage": api.Series{
-			"USERNAME-letschat_frontend_node./var/www": api.DataPoints{0: &api.Point{
+			"USERNAME-letschat_frontend_node./var/www": api.DataPoints{0: &api.DataPoint{
 				X: api.Timestamp{Time: time.Date(2015, 11, 4, 14, 17, 19, 0, time.UTC)},
 				Y: api.Float64(12.2),
 			},
 			},
-			"USERNAME-letschat_frontend_node./var/test": api.DataPoints{0: &api.Point{
+			"USERNAME-letschat_frontend_node./var/test": api.DataPoints{0: &api.DataPoint{
 				X: api.Timestamp{Time: time.Date(2015, 11, 4, 14, 17, 19, 0, time.UTC)},
 				Y: api.Float64(12.9),
 			},
 			},
 		},
 		"container_network_receive_bytes_per_second": api.Series{
-			"USERNAME-letschat_frontend_node.59f7edf4-82ff-11e5-8ac1-56847afe9799-eth0": api.DataPoints{0: &api.Point{
+			"USERNAME-letschat_frontend_node.59f7edf4-82ff-11e5-8ac1-56847afe9799-eth0": api.DataPoints{0: &api.DataPoint{
 				X: api.Timestamp{Time: time.Date(2015, 11, 4, 14, 17, 19, 0, time.UTC)},
 				Y: api.Float64(5767168),
 			},
 			},
-			"USERNAME-letschat_frontend_node.59f7edf4-82ff-11e5-8ac1-56847afe9799-ethwe": api.DataPoints{0: &api.Point{
+			"USERNAME-letschat_frontend_node.59f7edf4-82ff-11e5-8ac1-56847afe9799-ethwe": api.DataPoints{0: &api.DataPoint{
 				X: api.Timestamp{Time: time.Date(2015, 11, 4, 14, 17, 19, 0, time.UTC)},
 				Y: api.Float64(97.792),
 			},
 			},
 		},
 		"container_network_transmit_bytes_per_second": api.Series{
-			"USERNAME-letschat_frontend_node.59f7edf4-82ff-11e5-8ac1-56847afe9799-eth0": api.DataPoints{0: &api.Point{
+			"USERNAME-letschat_frontend_node.59f7edf4-82ff-11e5-8ac1-56847afe9799-eth0": api.DataPoints{0: &api.DataPoint{
 				X: api.Timestamp{Time: time.Date(2015, 11, 4, 14, 17, 19, 0, time.UTC)},
 				Y: api.Float64(152567808),
 			},
 			},
-			"USERNAME-letschat_frontend_node.59f7edf4-82ff-11e5-8ac1-56847afe9799-ethwe": api.DataPoints{0: &api.Point{
+			"USERNAME-letschat_frontend_node.59f7edf4-82ff-11e5-8ac1-56847afe9799-ethwe": api.DataPoints{0: &api.DataPoint{
 				X: api.Timestamp{Time: time.Date(2015, 11, 4, 14, 17, 19, 0, time.UTC)},
 				Y: api.Float64(108032),
 			},

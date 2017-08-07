@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/mitchellh/cli"
+
 	"github.com/sloppyio/cli/ui"
 )
 
@@ -47,7 +48,7 @@ func TestStatsCommand_withAllFlag(t *testing.T) {
 		"letschat",
 	}
 	testCodeAndOutput(t, mockUI, c.Run(args), 0,
-		"frontend/node-59f7ed 	 128 MiB / 1024 MiB 	 12.5% 	 5.5 MiB / 146 MiB 	 97.8 B / 106 KiB 	 12.9%")
+		"frontend/node-59f7ed 	 0.0% 	 128 MiB / 1024 MiB 	 12.5% 	 5.5 MiB / 146 MiB 	 97.8 B / 106 KiB 	 12.9%")
 }
 
 func TestStatsCommand_notEnoughArgs(t *testing.T) {

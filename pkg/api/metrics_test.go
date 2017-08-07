@@ -11,7 +11,7 @@ func TestMetricsUnmarshal(t *testing.T) {
 	want := Metrics{
 		"container_memory_usage_bytes": Series{
 			"node-1234": DataPoints{
-				&Point{
+				&DataPoint{
 					X: Timestamp{time.Date(2015, 11, 4, 14, 17, 19, 0, time.UTC)},
 					Y: Float64(31244288),
 				},
