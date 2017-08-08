@@ -23,7 +23,7 @@ set -- $1 "test"
 output="sloppy"
 source "${__scripts}/compile.sh"
 
-export SLOPPY_APIHOST=https://api.sloppy.io
+export SLOPPY_API_URL=https://api.sloppy.io/v1/
 export PATH="${BUILD_TARGET}:$PATH"
 
 {

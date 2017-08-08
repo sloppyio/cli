@@ -8,7 +8,8 @@ DOCKER_IMAGE := sloppy/go-cross:latest
 
 # env vars passed through directly to Docker's build scripts
 DOCKER_ENVS := \
-	-e GIT_COMMIT=$(GIT_COMMIT)
+	-e GIT_COMMIT=$(GIT_COMMIT) \
+	-e SLOPPY_APITOKEN=$(SLOPPY_APITOKEN)
 
 
 DOCKER_MOUNT := -v "$(CURDIR):/go/src/github.com/sloppyio/cli" \
@@ -59,6 +60,9 @@ bundle:
 
 coverage-show:
 	go tool cover -html=coverage.txt
+
+coverage-report:
+	goveralls -coverprofile=coverage.txt -service=travis-ci
 
 clean:
 	rm -rf bundles

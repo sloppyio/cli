@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	envHost  = "SLOPPY_APIHOST"
-	envToken = "SLOPPY_APITOKEN"
+	envApiURL = "SLOPPY_API_URL"
+	envToken  = "SLOPPY_APITOKEN"
 )
 
 // client is used in each command to handle api requests.
@@ -74,12 +74,11 @@ func main() {
 		fatal("Missing access token")
 	}
 
-	if host, ok := os.LookupEnv(envHost); ok {
-		err := client.SetBaseURL(host)
+	if apiURL, ok := os.LookupEnv(envApiURL); ok {
+		err := client.SetBaseURL(apiURL)
 		if err != nil {
-			fatal("Error setting base url to %q", host)
+			fatal("Error setting base url to %q", apiURL)
 		}
-		println("Setting client base url to:", host)
 	}
 
 	cli := &cli.CLI{

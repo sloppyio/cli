@@ -1,8 +1,8 @@
 # sloppy.io CLI
 
-sloppy is a command line tool for [sloppy.io](https://sloppy.io), a container as a service provider.
+[![GoDoc](https://godoc.org/github.com/sloppyio/cli?status.svg)](https://godoc.org/github.com/sloppyio/cli) [![Build Status](https://travis-ci.org/sloppyio/cli.svg?branch=master)](https://travis-ci.org/sloppyio/cli) [![Coverage Status](https://coveralls.io/repos/github/sloppyio/cli/badge.svg?branch=master)](https://coveralls.io/github/sloppyio/cli?branch=master)
 
-[![GoDoc](https://godoc.org/github.com/sloppyio/cli/src?status.svg)](https://godoc.org/github.com/sloppyio/cli/src/)  
+sloppy is a command line tool for [sloppy.io](https://sloppy.io), a container as a service provider.  
 
 ## Installation
 
