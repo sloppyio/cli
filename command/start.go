@@ -38,7 +38,7 @@ Examples:
 // Run should run the actual command with the given CLI instance and
 // command-line args.
 func (c *StartCommand) Run(args []string) int {
-	var vars stringMap
+	var vars StringMap
 	cmdFlags := newFlagSet("start", flag.ContinueOnError)
 	cmdFlags.Var(&vars, "v", "")
 	cmdFlags.Var(&vars, "var", "")

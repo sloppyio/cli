@@ -1,4 +1,4 @@
-package command
+package command_test
 
 import (
 	"strings"
@@ -7,10 +7,11 @@ import (
 	"github.com/mitchellh/cli"
 	"github.com/sloppyio/cli/pkg/api"
 	"github.com/sloppyio/cli/ui"
+	"github.com/sloppyio/cli/command"
 )
 
 func TestDockerLogoutCommand_implements(t *testing.T) {
-	c := &DockerLogoutCommand{}
+	c := &command.DockerLogoutCommand{}
 
 	if !strings.Contains(c.Help(), "Usage: sloppy docker-logout") {
 		t.Errorf("Help = %s", c.Help())
@@ -24,7 +25,7 @@ func TestDockerLogoutCommand_implements(t *testing.T) {
 func TestDockerLogoutCommand(t *testing.T) {
 	registryCredentials := &mockRegistryCredentialsEndpoint{}
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &DockerLogoutCommand{UI: mockUI, RegistryCredentials: registryCredentials}
+	c := &command.DockerLogoutCommand{UI: mockUI, RegistryCredentials: registryCredentials}
 
 	testCodeAndOutput(t, mockUI, c.Run([]string{}), 0, "Removed access to your private repository.")
 }
@@ -34,7 +35,7 @@ func TestDockerLogoutCommand_failed(t *testing.T) {
 		wantMessage: "No credentials found",
 	}
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &DockerLogoutCommand{UI: mockUI, RegistryCredentials: registryCredentials}
+	c := &command.DockerLogoutCommand{UI: mockUI, RegistryCredentials: registryCredentials}
 
 	testCodeAndOutput(t, mockUI, c.Run([]string{}), 1, "You currently don't have access to private repositories.")
 }
@@ -44,7 +45,7 @@ func TestDockerLogoutCommand_notLoggedIn(t *testing.T) {
 		wantMessage: api.ErrMissingAccessToken.Error(),
 	}
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &DockerLogoutCommand{UI: mockUI, RegistryCredentials: registryCredentials}
+	c := &command.DockerLogoutCommand{UI: mockUI, RegistryCredentials: registryCredentials}
 
 	testCodeAndOutput(t, mockUI, c.Run([]string{}), 1, "not logged in")
 }

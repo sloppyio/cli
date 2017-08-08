@@ -1,4 +1,4 @@
-package command
+package command_test
 
 import (
 	"fmt"
@@ -10,10 +10,11 @@ import (
 
 	"github.com/mitchellh/cli"
 	"github.com/sloppyio/cli/ui"
+	"github.com/sloppyio/cli/command"
 )
 
 func TestDockerLoginCommand_implements(t *testing.T) {
-	c := &DockerLoginCommand{}
+	c := &command.DockerLoginCommand{}
 
 	if !strings.Contains(c.Help(), "Usage: sloppy docker-login") {
 		t.Errorf("Help = %s", c.Help())
@@ -31,7 +32,7 @@ func TestDockerLoginCommand(t *testing.T) {
 
 	registryCredentials := &mockRegistryCredentialsEndpoint{}
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{InputReader: inR}}
-	c := &DockerLoginCommand{UI: mockUI, RegistryCredentials: registryCredentials}
+	c := &command.DockerLoginCommand{UI: mockUI, RegistryCredentials: registryCredentials}
 
 	// Create dummy file
 	file := createTempFile(t, "docker", "success")
@@ -51,7 +52,7 @@ func TestDockerLoginCommand_failed(t *testing.T) {
 
 	registryCredentials := &mockRegistryCredentialsEndpoint{}
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{InputReader: inR}}
-	c := &DockerLoginCommand{UI: mockUI, RegistryCredentials: registryCredentials}
+	c := &command.DockerLoginCommand{UI: mockUI, RegistryCredentials: registryCredentials}
 
 	// Create dummy file
 	file := createTempFile(t, "docker", "failed")
@@ -70,7 +71,7 @@ func TestDockerLoginCommand_abort(t *testing.T) {
 	defer inW.Close()
 
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{InputReader: inR}}
-	c := &DockerLoginCommand{UI: mockUI}
+	c := &command.DockerLoginCommand{UI: mockUI}
 
 	// Create dummy file
 	file := createTempFile(t, "docker", "abort")
@@ -85,7 +86,7 @@ func TestDockerLoginCommand_abort(t *testing.T) {
 
 func TestDockerLoginCommand_noDockerConfig(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &DockerLoginCommand{UI: mockUI}
+	c := &command.DockerLoginCommand{UI: mockUI}
 
 	args := []string{"noDockerConfig.json"}
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "doesn't exist.")

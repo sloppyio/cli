@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"fmt"
@@ -7,21 +7,26 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/sloppyio/cli/internal/test"
+	"github.com/sloppyio/cli/pkg/api"
 )
 
 func TestRegistryCredentialsCheck(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/registrycredentials", func(w http.ResponseWriter, r *http.Request) {
+	helper := test.NewHelper(t)
+	handler := func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
+		fmt.Fprint(w, `{"status":"success", "message":"Docker credentials exist"}`)
+	}
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
 
-		fmt.Fprintf(w, `{"status":"success", "message":"Docker credentials exist"}`)
-	})
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("test")
 
 	status, _, _ := client.RegistryCredentials.Check()
 
-	want := &StatusResponse{
+	want := &api.StatusResponse{
 		Status:  "success",
 		Message: "Docker credentials exist",
 	}
@@ -32,18 +37,19 @@ func TestRegistryCredentialsCheck(t *testing.T) {
 }
 
 func TestRegistryCredentialsCheck_notFound(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/registrycredentials", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		w.WriteHeader(http.StatusNotFound)
-		fmt.Fprintf(w, `{"status":"error", "message":"No credentials found"}`)
-	})
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler(
+		[]byte(`{"status":"error", "message":"No credentials found"}`),
+		"/registrycredentials",
+	)
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	status, _, _ := client.RegistryCredentials.Check()
 
-	want := &StatusResponse{
+	want := &api.StatusResponse{
 		Status:  "error",
 		Message: "No credentials found",
 	}
@@ -53,37 +59,20 @@ func TestRegistryCredentialsCheck_notFound(t *testing.T) {
 	}
 }
 
-func TestRegistryCredentialsCheck_serverError(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/registrycredentials", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, `{"status":"error", "message":"something happend"}`)
-	})
-
-	_, resp, err := client.RegistryCredentials.Check()
-
-	want := newErrorResponse(resp, "something happend", "")
-
-	if !reflect.DeepEqual(err, want) {
-		t.Errorf("Check() = %v, want %v", err, want)
-	}
-}
-
 func TestRegistryCredentialsDelete(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/registrycredentials", func(w http.ResponseWriter, r *http.Request) {
+	helper := test.NewHelper(t)
+	handler := func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
-		fmt.Fprintf(w, `{"status":"success", "message":"Docker credentials removed"}`)
-	})
+		fmt.Fprint(w, `{"status":"success", "message":"Docker credentials removed"}`)
+	}
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	status, _, _ := client.RegistryCredentials.Delete()
 
-	want := &StatusResponse{
+	want := &api.StatusResponse{
 		Status:  "success",
 		Message: "Docker credentials removed",
 	}
@@ -94,12 +83,9 @@ func TestRegistryCredentialsDelete(t *testing.T) {
 }
 
 func TestRegistryCredentialsUpload(t *testing.T) {
-	setup()
-	defer teardown()
-
 	input := `{"auths":{"https://index.docker.io/v1/":{"auth":"abc","email":"dev@example.com"}}}`
-
-	mux.HandleFunc("/registrycredentials", func(w http.ResponseWriter, r *http.Request) {
+	helper := test.NewHelper(t)
+	handler := func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "PUT")
 
 		data, err := ioutil.ReadAll(r.Body)
@@ -112,37 +98,22 @@ func TestRegistryCredentialsUpload(t *testing.T) {
 			t.Errorf("Wrong body = %s, want %s", string(data), input)
 		}
 
-		fmt.Fprintf(w, `{"status":"success", "message":"Uploaded docker credentials"}`)
-	})
+		fmt.Fprint(w, `{"status":"success", "message":"Uploaded docker credentials"}`)
+	}
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	reader := strings.NewReader(input)
 	status, _, _ := client.RegistryCredentials.Upload(reader)
 
-	want := &StatusResponse{
+	want := &api.StatusResponse{
 		Status:  "success",
 		Message: "Uploaded docker credentials",
 	}
 
 	if !reflect.DeepEqual(status, want) {
 		t.Errorf("Upload(%s) = %v, want %v", "test", status, want)
-	}
-}
-
-func TestRegistryCredentialsUpload_serverErrors(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/registrycredentials", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "PUT")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, `{"status":"error", "message":"Uploaded docker credentials failed"}`)
-	})
-
-	_, resp, err := client.RegistryCredentials.Upload(strings.NewReader(`{}`))
-
-	want := newErrorResponse(resp, "Uploaded docker credentials failed", "")
-
-	if !reflect.DeepEqual(err, want) {
-		t.Errorf("Upload(%s) = %v, want %v", "test", err, want)
 	}
 }

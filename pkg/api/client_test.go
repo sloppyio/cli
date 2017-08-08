@@ -1,4 +1,4 @@
-package api
+package api_test
 
 import (
 	"bytes"
@@ -6,71 +6,30 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"testing"
+
+	"github.com/sloppyio/cli/internal/test"
+	"github.com/sloppyio/cli/pkg/api"
 )
-
-var (
-	// mux is the HTTP request multiplexer used with the test server.
-	mux *http.ServeMux
-
-	// client is the sloppy.io client being tested.
-	client *Client
-
-	// server is a test HTTP server used to provide mock API responses.
-	server *httptest.Server
-)
-
-// setup sets up a test HTTP server along with a sloppy.Client that is
-// configured to talk to that test server. Tests should register handlers
-// on mux which provide mock responses for the API method being tested.
-func setup() {
-	mux = http.NewServeMux()
-	server = httptest.NewServer(mux)
-
-	client = NewClient()
-
-	client.SetAccessToken("setupToken")
-
-	testURL, _ := url.Parse(server.URL)
-	client.baseURL = testURL
-}
-
-// teardown to close the test server
-func teardown() {
-	server.Close()
-}
-
-func TestNewClient(t *testing.T) {
-	client := NewClient()
-
-	if got, want := client.baseURL.String(), DefaultBaseURL+apiVersion+"/"; got != want {
-		t.Errorf("BaseURL = %v, want %v", got, want)
-	}
-
-	if got, want := client.UserAgent, userAgent; got != want {
-		t.Errorf("UserAgent = %v, want %v", got, want)
-	}
-}
 
 func TestNewRequest(t *testing.T) {
-	client := NewClient()
+	client := api.NewClient()
 	client.SetAccessToken("testToken")
 
 	// test input, output
-	inURL, outURL := "bar/", DefaultBaseURL+apiVersion+"/bar/"
+	inURL, outURL := "bar/", fmt.Sprintf("%sbar/", client.GetBaseURL())
 	var inBody, outBody = struct {
-		Bar *string
+		Bar string
 	}{
-		Bar: String("Baz"),
+		Bar: "Baz",
 	}, `{"Bar":"Baz"}` + "\n"
 
 	req, _ := client.NewRequest("GET", inURL, inBody)
 
 	if got, want := req.URL.String(), outURL; got != want {
-		t.Errorf("%v: URL = %v, want %v", inURL, got, want)
+		t.Errorf("in %s:\ngot:\t%s\nwant:\t%v\n", inURL, got, want)
 	}
 
 	body, _ := ioutil.ReadAll(req.Body)
@@ -78,11 +37,11 @@ func TestNewRequest(t *testing.T) {
 		t.Errorf("%+v: Body = %v, want %v", inBody, got, want)
 	}
 
-	if got, want := req.Header.Get("User-Agent"), client.UserAgent; got != want {
+	if got, want := req.Header.Get("User-Agent"), client.GetHeader("User-Agent")[0]; got != want {
 		t.Errorf("UserAgent = %v, want %v", got, want)
 	}
 
-	if got, want := req.Header.Get("Accept"), defaultMIMEType; got != want {
+	if got, want := req.Header.Get("Accept"), client.GetHeader("Accept")[0]; got != want {
 		t.Errorf("Accept = %v, want %v", got, want)
 	}
 
@@ -92,36 +51,21 @@ func TestNewRequest(t *testing.T) {
 }
 
 func TestNewRequest_notAuthenticated(t *testing.T) {
-	client := NewClient()
-
-	if _, err := client.NewRequest("GET", "/", nil); err == nil {
-		t.Errorf("Expect error to be returned")
-	} else if err != ErrMissingAccessToken {
-		t.Errorf("Error: %v, want %s", err, ErrMissingAccessToken)
+	client := api.NewClient()
+	_, err := client.NewRequest("GET", "/", nil)
+	if err == nil {
+		t.Error("Expect error to be returned")
+	} else if err != nil && err != api.ErrMissingAccessToken {
+		t.Errorf("Error: %v, want %v", err, api.ErrMissingAccessToken)
 	}
 }
 
 func TestNewRequest_invalidURL(t *testing.T) {
-	client := NewClient()
+	client := api.NewClient()
+	client.SetAccessToken("someToken")
 
 	_, err := client.NewRequest("GET", "%", nil)
 	testURLParseError(t, err)
-}
-
-func TestNewRequest_invalidJSON(t *testing.T) {
-	client := NewClient()
-
-	type T struct {
-		A map[struct{}]interface{}
-	}
-
-	_, err := client.NewRequest("GET", "/", &T{})
-	if err == nil {
-		t.Error("Expected error to be returned")
-	}
-	if err, ok := err.(*json.UnsupportedTypeError); !ok {
-		t.Errorf("Expected JSON marshal error, got %+v", err)
-	}
 }
 
 type errorReadWriter struct{}
@@ -134,20 +78,18 @@ func (w *errorReadWriter) Write(d []byte) (int, error) {
 }
 
 func TestNewRequest_withErrorReadWriter(t *testing.T) {
-	client := NewClient()
+	client := api.NewClient()
 	if _, err := client.NewRequest("GET", "", &errorReadWriter{}); err == nil {
 		t.Error("Expected error to be returned")
 	}
 }
 
 func TestDo(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		fmt.Fprint(w, `{"status":"success", "data":{"Bar":"Baz"}}`)
-	})
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler([]byte(`{"status":"success", "data":{"Bar":"Baz"}}`), "/")
+	server := helper.NewAPIServer(handler)
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	type foo struct {
 		Bar string
@@ -167,13 +109,11 @@ func TestDo(t *testing.T) {
 }
 
 func TestDo_withWriter(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		fmt.Fprint(w, `abc`)
-	})
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler([]byte(`abc`), "/")
+	server := helper.NewAPIServer(handler)
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	req, err := client.NewRequest("GET", "/", nil)
 	if err != nil {
@@ -193,12 +133,11 @@ func TestDo_withWriter(t *testing.T) {
 }
 
 func TestDo_withErrorReadWriter(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "{}")
-	})
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler([]byte(`{}`), "/")
+	server := helper.NewAPIServer(handler)
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	req, err := client.NewRequest("GET", "/", nil)
 	if err != nil {
@@ -210,14 +149,15 @@ func TestDo_withErrorReadWriter(t *testing.T) {
 }
 
 func TestDo_errorResponse(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	helper := test.NewHelper(t)
+	handler := func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		w.WriteHeader(http.StatusNotFound)
 		fmt.Fprint(w, `{"status":"error", "message":"not found","reason":"some reason"}`)
-	})
+	}
+	server := helper.NewAPIServer(handler)
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	req, err := client.NewRequest("GET", "/", nil)
 	if err != nil {
@@ -228,14 +168,15 @@ func TestDo_errorResponse(t *testing.T) {
 }
 
 func TestDo_invalidToken(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	helper := test.NewHelper(t)
+	handler := func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprint(w, `{"status":"error","message":"No valid token found.", "reason": "Check https://admin.sloppy.io/account/profile for your token."}`)
-	})
+	}
+	server := helper.NewAPIServer(handler)
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	req, err := client.NewRequest("GET", "/", nil)
 	if err != nil {
@@ -247,13 +188,11 @@ func TestDo_invalidToken(t *testing.T) {
 }
 
 func TestDo_invalidJSONBody(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		fmt.Fprint(w, `{b}`)
-	})
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler([]byte(`{b}`), "/")
+	server := helper.NewAPIServer(handler)
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	type T struct {
 		A map[int]interface{}
@@ -270,13 +209,11 @@ func TestDo_invalidJSONBody(t *testing.T) {
 }
 
 func TestDo_noRequest(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		fmt.Fprint(w, `{}`)
-	})
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler([]byte(`{}`), "/")
+	server := helper.NewAPIServer(handler)
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	if _, err := client.Do(&http.Request{}, nil); err == nil {
 		t.Error("Expected error to be returned.")
@@ -284,15 +221,15 @@ func TestDo_noRequest(t *testing.T) {
 }
 
 func TestStatusResponse(t *testing.T) {
-	status := StatusResponse{Status: "Success", Message: "m"}
+	status := api.StatusResponse{Status: "Success", Message: "m"}
 	if status.String() == "" {
 		t.Error("Expected non-empty StatusResponse.String()")
 	}
 }
 
 func TestErrorResponse(t *testing.T) {
-	err := ErrorResponse{
-		StatusResponse: StatusResponse{
+	err := api.ErrorResponse{
+		StatusResponse: api.StatusResponse{
 			Status: "error", Message: "m",
 		},
 		Reason: "r",
@@ -313,9 +250,9 @@ func testMethod(t *testing.T, r *http.Request, want string) {
 	}
 }
 
-func testErrorResponse(t *testing.T, err error, want *ErrorResponse) {
+func testErrorResponse(t *testing.T, err error, want *api.ErrorResponse) {
 	switch err := err.(type) {
-	case *ErrorResponse:
+	case *api.ErrorResponse:
 		if want == nil {
 			return
 		}
@@ -345,21 +282,21 @@ func testURLParseError(t *testing.T, err error) {
 	return
 }
 
-func newStatusResponse(v interface{}) *StatusResponse {
+func newStatusResponse(v interface{}) *api.StatusResponse {
 	data, err := json.Marshal(v)
 	if err != nil {
-		return &StatusResponse{Status: "error"}
+		return &api.StatusResponse{Status: "error"}
 	}
-	return &StatusResponse{
+	return &api.StatusResponse{
 		Status: "success",
 		Data:   data,
 	}
 }
 
-func newErrorResponse(r *http.Response, message, reason string) *ErrorResponse {
-	return &ErrorResponse{
+func newErrorResponse(r *http.Response, message, reason string) *api.ErrorResponse {
+	return &api.ErrorResponse{
 		Response: r,
-		StatusResponse: StatusResponse{
+		StatusResponse: api.StatusResponse{
 			Status:  "error",
 			Message: message,
 		},

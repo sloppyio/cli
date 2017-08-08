@@ -51,6 +51,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/mohae/deepcopy"
+  packages = ["."]
+  revision = "491d3605edfb866af34a48075bd4355ac1bf46ca"
+
+[[projects]]
+  branch = "master"
   name = "github.com/olekukonko/tablewriter"
   packages = ["."]
   revision = "be5337e7b39e64e5f91445ce7e721888dbab7387"
@@ -76,6 +82,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a9813a991d249e777628e396ef8f7bb8f3e2958917e04eff50349e4b554ce832"
+  inputs-digest = "f10263f751c95733ae2e36b269eead8b8afd07b45b62322fef4782731be9199c"
   solver-name = "gps-cdcl"
   solver-version = 1

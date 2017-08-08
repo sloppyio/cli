@@ -11,10 +11,12 @@ import (
 	"github.com/sloppyio/cli/pkg/api"
 )
 
+// FIXME this is basically obsolete when the underlying encoding packages (yml & json) are used.
+
 func TestDecode_invalidSyntaxCompactJSON(t *testing.T) {
 	reader := strings.NewReader(`{"project":"apache","services":[{"id":"frontend","apps":[{"id":"apache","domain":{"type":"HTTP","uri":"sloppy-cli-testing.sloppy.zone"},"mem":124"image":"sloppy/apache-php","instances":1,"port_mappings":[{"container_port":80},{"container_port":443}]}]}]}`)
 
-	d := newDecoder(reader, stringMap{})
+	d := newDecoder(reader, StringMap{})
 	input := new(api.Project)
 
 	if err := d.DecodeJSON(input); err == nil {
@@ -53,7 +55,7 @@ func TestDecode_invalidSyntaxJSON(t *testing.T) {
     ]
 }`)
 
-	d := newDecoder(reader, stringMap{})
+	d := newDecoder(reader, StringMap{})
 	input := new(api.Project)
 
 	if err := d.DecodeJSON(input); err == nil {
@@ -66,7 +68,7 @@ func TestDecode_invalidSyntaxJSON(t *testing.T) {
 func TestDecode_invalidTypeCompactJSON(t *testing.T) {
 	reader := strings.NewReader(`{"project":"apache","services":[{"id":"frontend","apps":[{"id":"apache","domain":{"uri":"sloppy-cli-testing.sloppy.zone"},"mem":"124","image":"sloppy/apache-php","instances":1,"port_mappings":[{"container_port":80},{"container_port":443}]}]}]}`)
 
-	d := newDecoder(reader, stringMap{})
+	d := newDecoder(reader, StringMap{})
 	input := new(api.Project)
 
 	if err := d.DecodeJSON(input); err == nil {
@@ -105,7 +107,7 @@ func TestDecode_invalidTypeJSON(t *testing.T) {
     ]
 }`)
 
-	d := newDecoder(reader, stringMap{})
+	d := newDecoder(reader, StringMap{})
 	input := new(api.Project)
 
 	if err := d.DecodeJSON(input); err == nil {
@@ -160,7 +162,7 @@ func TestDecode_unknownFieldsJSON(t *testing.T) {
 
 	for i, tt := range unknownFieldsTests {
 		r := strings.NewReader(tt.input)
-		d := newDecoder(r, stringMap{})
+		d := newDecoder(r, StringMap{})
 		input := new(api.Project)
 		err := d.DecodeJSON(input)
 		if err != nil && !tt.expectError {
@@ -174,7 +176,7 @@ func TestDecode_unknownFieldsJSON(t *testing.T) {
 
 func TestDecodeYAML(t *testing.T) {
 	reader := strings.NewReader(testYAMLInput)
-	d := newDecoder(reader, stringMap{})
+	d := newDecoder(reader, StringMap{})
 	input := new(api.Project)
 
 	if err := d.DecodeYAML(input); err != nil {
@@ -267,7 +269,7 @@ func TestDecodeYAML(t *testing.T) {
 
 func TestDecodeYAML_minimalYAML(t *testing.T) {
 	reader := strings.NewReader(testMinimalYAMLInput)
-	d := newDecoder(reader, stringMap{})
+	d := newDecoder(reader, StringMap{})
 	input := new(api.Project)
 
 	if err := d.DecodeYAML(input); err != nil {
@@ -447,7 +449,7 @@ func TestDecodeYAML_errors(t *testing.T) {
 
 	for i, tt := range errorsTests {
 		reader := strings.NewReader(strings.Replace(tt.in, "\t", "  ", -1))
-		d := newDecoder(reader, stringMap{})
+		d := newDecoder(reader, StringMap{})
 		input := new(api.Project)
 
 		err := d.DecodeYAML(input)

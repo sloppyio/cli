@@ -1,15 +1,16 @@
-package command
+package command_test
 
 import (
 	"strings"
 	"testing"
 
 	"github.com/mitchellh/cli"
+	"github.com/sloppyio/cli/command"
 	"github.com/sloppyio/cli/ui"
 )
 
 func TestRestartCommand_implements(t *testing.T) {
-	c := &RestartCommand{}
+	c := &command.RestartCommand{}
 
 	if !strings.Contains(c.Help(), "Usage: sloppy restart") {
 		t.Errorf("Help = %s", c.Help())
@@ -23,7 +24,7 @@ func TestRestartCommand_implements(t *testing.T) {
 func TestRestartCommand(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &RestartCommand{UI: mockUI, Apps: apps}
+	c := &command.RestartCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/node",
@@ -33,7 +34,7 @@ func TestRestartCommand(t *testing.T) {
 
 func TestRestartCommand_invalidAppPath(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &RestartCommand{UI: mockUI}
+	c := &command.RestartCommand{UI: mockUI}
 
 	args := []string{
 		"letschat/frontend/node/node",
@@ -44,7 +45,7 @@ func TestRestartCommand_invalidAppPath(t *testing.T) {
 
 func TestRestartCommand_notEnoughArgs(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &RestartCommand{UI: mockUI}
+	c := &command.RestartCommand{UI: mockUI}
 
 	args := []string{}
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "minimum of 1 argument")
@@ -53,7 +54,7 @@ func TestRestartCommand_notEnoughArgs(t *testing.T) {
 func TestRestartCommand_notFound(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &RestartCommand{UI: mockUI, Apps: apps}
+	c := &command.RestartCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/apache",

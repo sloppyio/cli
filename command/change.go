@@ -83,7 +83,7 @@ func (c *ChangeCommand) Run(args []string) int {
 func (c *ChangeCommand) updateApp(args []string) int {
 	var memory, instances int
 	var image, domain string
-	var env stringMap
+	var env StringMap
 	cmdFlags := newFlagSet("change", flag.ContinueOnError)
 	cmdFlags.IntVar(&memory, "m", 0, "")
 	cmdFlags.IntVar(&memory, "memory", 0, "")
@@ -147,7 +147,7 @@ func (c *ChangeCommand) updateApp(args []string) int {
 
 // Updates an entire project
 func (c *ChangeCommand) updateProject(args []string) int {
-	var vars stringMap
+	var vars StringMap
 	var force bool
 	cmdFlags := newFlagSet("change", flag.ContinueOnError)
 	cmdFlags.Var(&vars, "var", "")

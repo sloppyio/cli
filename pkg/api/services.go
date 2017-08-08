@@ -79,7 +79,7 @@ func (s *ServicesEndpoint) Delete(project, id string, force bool) (*StatusRespon
 }
 
 // GetLogs returns logs for all apps included in a specific project.
-func (s *ServicesEndpoint) GetLogs(project, service string, limit int) (<-chan LogEntry, <-chan error) {
+func (s *ServicesEndpoint) GetLogs(project, service string, limit int) (*LogEntry, error) {
 	u := fmt.Sprintf("apps/%s/services/%s/logs", project, service)
 
 	return retrieveLogs(s.client, u, limit)
@@ -111,5 +111,5 @@ type ServicesDeleter interface {
 
 // ServicesLogger is an interface which provides the getLogs method.
 type ServicesLogger interface {
-	GetLogs(project, id string, limit int) (<-chan LogEntry, <-chan error)
+	GetLogs(project, id string, limit int) (*LogEntry, error)
 }

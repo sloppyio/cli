@@ -7,18 +7,18 @@ import (
 	"strings"
 )
 
-// stringMap is used to handle multiple flag
-type stringMap map[string]string
+// StringMap is used to handle multiple flag
+type StringMap map[string]string
 
-func (s *stringMap) String() string {
+func (s *StringMap) String() string {
 	return fmt.Sprintf("%v", *s)
 }
 
-func (s *stringMap) Get() interface{} { return stringMap(*s) }
+func (s *StringMap) Get() interface{} { return StringMap(*s) }
 
-func (s *stringMap) Set(value string) error {
+func (s *StringMap) Set(value string) error {
 	if (*s) == nil {
-		*s = make(stringMap)
+		*s = make(StringMap)
 	}
 
 	// Backwards compatibility

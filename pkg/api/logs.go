@@ -3,8 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"strconv"
 	"time"
 )
@@ -39,23 +37,11 @@ func (u *Timestamp) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func retrieveLogs(c *Client, urlStr string, limit int) (<-chan LogEntry, <-chan error) {
-	// Establish channels for log entries and errors
-	errs := make(chan error, 1)
-	logs := make(chan LogEntry)
-
+func retrieveLogs(c *Client, urlStr string, limit int) (*LogEntry, error) {
 	req, err := c.NewRequest("GET", urlStr, nil)
 	if err != nil {
-		// Send error to error channel
-		errs <- err
-
-		close(errs)
-		close(logs)
-		return logs, errs
+		return nil, err
 	}
-
-	// Prevent timeout
-	c.Timer.Stop()
 
 	// Add limit parameter
 	if limit > 0 {
@@ -64,40 +50,11 @@ func retrieveLogs(c *Client, urlStr string, limit int) (<-chan LogEntry, <-chan 
 		req.URL.RawQuery = values.Encode()
 	}
 
-	// Pipe creates a synchronous in-memory pipe
-	pipeReader, pipeWriter := io.Pipe()
+	var log LogEntry
+	_, err = c.Do(req, log)
+	if err != nil {
+		return nil, err
+	}
 
-	// Start request concurrently
-	go func(req *http.Request, w io.WriteCloser) {
-		defer w.Close()
-
-		_, err = c.Do(req, w)
-		if err != nil {
-			errs <- err
-		}
-	}(req, pipeWriter)
-
-	// Analyze json stream
-	go func(pr *io.PipeReader) {
-		// Close everything after getting EOF
-		defer func() {
-			pr.Close()
-			close(errs)
-			close(logs)
-		}()
-
-		dec := json.NewDecoder(pr)
-		for {
-			var log LogEntry
-			if err := dec.Decode(&log); err != nil {
-				errs <- err
-				break
-			} else {
-				logs <- log
-			}
-		}
-
-	}(pipeReader)
-
-	return logs, errs
+	return &log, err
 }

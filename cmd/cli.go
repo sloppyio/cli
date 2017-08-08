@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"runtime"
 	"runtime/debug"
@@ -26,7 +25,7 @@ func main() {
 	stackTrace := false // stackTrace holds the state whether a stack trace is displayed
 	defer func() {
 		if err := recover(); err != nil {
-			printError(os.Stderr, "Error executing CLI: %s", err)
+			printError("Error executing CLI: %s", err)
 			if stackTrace {
 				debug.PrintStack()
 			}
@@ -67,12 +66,20 @@ func main() {
 	}
 
 	client = api.NewClient()
-	client.UserAgent = userAgent()
-	client.SetAccessToken(os.Getenv(envToken))
-	host := os.Getenv(envHost)
-	if err := client.SetBaseURL(host); err != nil {
-		printError(os.Stderr, "error: parsing SLOPPY_APIHOST: %s\n", err.Error())
-		os.Exit(1)
+	client.SetUserAgent(userAgent())
+
+	if token, ok := os.LookupEnv(envToken); ok {
+		client.SetAccessToken(token)
+	} else {
+		fatal("Missing access token")
+	}
+
+	if host, ok := os.LookupEnv(envHost); ok {
+		err := client.SetBaseURL(host)
+		if err != nil {
+			fatal("Error setting base url to %q", host)
+		}
+		println("Setting client base url to:", host)
 	}
 
 	cli := &cli.CLI{
@@ -83,16 +90,21 @@ func main() {
 
 	exitCode, err := cli.Run()
 	if err != nil {
-		printError(os.Stderr, "Error executing CLI: %s\n", err.Error())
-		exitCode = 1
+		fatal("error executing CLI: %s\n", err.Error())
 	}
 
 	<-update // wait for update goroutine
 	os.Exit(exitCode)
 }
 
-func printError(w io.Writer, format string, v ...interface{}) {
+func fatal(msg string, args ...interface{}) {
+	printError(msg, args)
+	os.Exit(1)
+}
+
+func printError(format string, v ...interface{}) {
 	message := fmt.Sprintf(format, v...)
+	w := os.Stderr
 	if runtime.GOOS == "windows" {
 		fmt.Fprint(w, message)
 	} else {

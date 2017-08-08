@@ -1,4 +1,4 @@
-package command
+package command_test
 
 import (
 	"strings"
@@ -7,10 +7,11 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/sloppyio/cli/ui"
+	"github.com/sloppyio/cli/command"
 )
 
 func TestLogsCommand_implements(t *testing.T) {
-	c := &LogsCommand{}
+	c := &command.LogsCommand{}
 
 	if !strings.Contains(c.Help(), "Usage: sloppy logs") {
 		t.Errorf("Help = %s", c.Help())
@@ -24,7 +25,7 @@ func TestLogsCommand_implements(t *testing.T) {
 func TestLogsCommand(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	projects := &mockProjectsEndpoint{}
-	c := &LogsCommand{UI: mockUI, Projects: projects}
+	c := &command.LogsCommand{UI: mockUI, Projects: projects}
 
 	args := []string{
 		"letschat",
@@ -36,7 +37,7 @@ func TestLogsCommand(t *testing.T) {
 func TestLogsCommand_getLogsServices(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	services := &mockServicesEndpoint{}
-	c := &LogsCommand{UI: mockUI, Services: services}
+	c := &command.LogsCommand{UI: mockUI, Services: services}
 
 	args := []string{
 		"letschat/frontend",
@@ -47,7 +48,7 @@ func TestLogsCommand_getLogsServices(t *testing.T) {
 
 func TestLogsCommand_notEnoughArgs(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &LogsCommand{UI: mockUI}
+	c := &command.LogsCommand{UI: mockUI}
 
 	args := []string{}
 
@@ -57,7 +58,7 @@ func TestLogsCommand_notEnoughArgs(t *testing.T) {
 func TestLogsCommand_notFound(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &LogsCommand{UI: mockUI, Apps: apps}
+	c := &command.LogsCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/apache",
@@ -69,7 +70,7 @@ func TestLogsCommand_notFound(t *testing.T) {
 func TestLogsCommand_invalidAppPath(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &LogsCommand{UI: mockUI, Apps: apps}
+	c := &command.LogsCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/apache/node",
@@ -81,7 +82,7 @@ func TestLogsCommand_invalidAppPath(t *testing.T) {
 func TestLogsCommand_flagsAfterArgument(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &LogsCommand{UI: mockUI, Apps: apps}
+	c := &command.LogsCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/apache/node",

@@ -22,7 +22,7 @@ type decoder struct {
 	errorReader io.Reader
 }
 
-func newDecoder(r io.Reader, vars stringMap) *decoder {
+func newDecoder(r io.Reader, vars StringMap) *decoder {
 	var buf bytes.Buffer
 	r, err := replaceReader(r, vars)
 	return &decoder{

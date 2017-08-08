@@ -60,35 +60,26 @@ func (c *LogsCommand) Run(args []string) int {
 
 	parts := strings.Split(strings.Trim(cmdFlags.Arg(0), "/"), "/")
 
-	var logCh <-chan api.LogEntry
-	var errCh <-chan error
+	var log *api.LogEntry
+	var err error
 
 	switch len(parts) {
 	case 1:
-		logCh, errCh = c.Projects.GetLogs(parts[0], lines)
+		log, err = c.Projects.GetLogs(parts[0], lines)
 	case 2:
-		logCh, errCh = c.Services.GetLogs(parts[0], parts[1], lines)
+		log, err = c.Services.GetLogs(parts[0], parts[1], lines)
 	case 3:
-		logCh, errCh = c.Apps.GetLogs(parts[0], parts[1], parts[2], lines)
+		log, err = c.Apps.GetLogs(parts[0], parts[1], parts[2], lines)
 	default:
 		return c.UI.ErrorInvalidAppPath(cmdFlags.Arg(0))
 	}
 
-	for {
-		select {
-		case err, ok := <-errCh:
-			if ok {
-				c.UI.ErrorAPI(err)
-				return 1
-			}
-		case entry, ok := <-logCh:
-			if ok {
-				c.UI.Output(entry.String())
-			} else {
-				return 0
-			}
-		}
+	if err != nil {
+		c.UI.ErrorAPI(err)
+		return 1
 	}
+	c.UI.Output(log.String())
+	return 0
 }
 
 // Synopsis should return a one-line, short synopsis of the command.

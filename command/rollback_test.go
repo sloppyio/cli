@@ -1,4 +1,4 @@
-package command
+package command_test
 
 import (
 	"strings"
@@ -6,10 +6,11 @@ import (
 
 	"github.com/mitchellh/cli"
 	"github.com/sloppyio/cli/ui"
+	"github.com/sloppyio/cli/command"
 )
 
 func TestRollbackCommand_implements(t *testing.T) {
-	c := &RollbackCommand{}
+	c := &command.RollbackCommand{}
 
 	if !strings.Contains(c.Help(), "Usage: sloppy rollback") {
 		t.Errorf("Help = %s", c.Help())
@@ -23,7 +24,7 @@ func TestRollbackCommand_implements(t *testing.T) {
 func TestRollbackCommand(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &RollbackCommand{UI: mockUI, Apps: apps}
+	c := &command.RollbackCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/node",
@@ -34,7 +35,7 @@ func TestRollbackCommand(t *testing.T) {
 
 func TestRollbackCommand_invalidAppPath(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &RollbackCommand{UI: mockUI}
+	c := &command.RollbackCommand{UI: mockUI}
 
 	args := []string{
 		"letschat/frontend/node/node",
@@ -45,7 +46,7 @@ func TestRollbackCommand_invalidAppPath(t *testing.T) {
 
 func TestRollbackCommand_notEnoughArgs(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &RollbackCommand{UI: mockUI}
+	c := &command.RollbackCommand{UI: mockUI}
 
 	args := []string{}
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "minimum of 2 arguments")
@@ -54,7 +55,7 @@ func TestRollbackCommand_notEnoughArgs(t *testing.T) {
 func TestRollbackCommand_notFound(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &RollbackCommand{UI: mockUI, Apps: apps}
+	c := &command.RollbackCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/apache",

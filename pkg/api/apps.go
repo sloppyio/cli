@@ -186,7 +186,7 @@ func (a *AppsEndpoint) Rollback(project, service, app, version string) (*App, *h
 }
 
 // GetLogs returns logs for specific app.
-func (a *AppsEndpoint) GetLogs(project, service, app string, limit int) (<-chan LogEntry, <-chan error) {
+func (a *AppsEndpoint) GetLogs(project, service, app string, limit int) (*LogEntry, error) {
 	u := fmt.Sprintf("apps/%s/services/%s/apps/%s/logs", project, service, app)
 
 	return retrieveLogs(a.client, u, limit)
@@ -200,7 +200,7 @@ func (a *AppsEndpoint) GetMetrics(project, service, app string) (Metrics, *http.
 		return nil, nil, err
 	}
 
-	metrics := make(Metrics, 5)
+	metrics := make(Metrics, 5) // FIXME why 5?
 	resp, err := a.client.Do(req, &metrics)
 	if err != nil {
 		return nil, resp, err
@@ -235,7 +235,7 @@ type AppsDeleter interface {
 
 // AppsLogger is an interface which provides the GetLogs method.
 type AppsLogger interface {
-	GetLogs(project, service, id string, limit int) (<-chan LogEntry, <-chan error)
+	GetLogs(project, service, id string, limit int) (*LogEntry, error)
 }
 
 // AppsRestarter is an interface which provides the Restart method.

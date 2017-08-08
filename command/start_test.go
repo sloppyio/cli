@@ -1,4 +1,4 @@
-package command
+package command_test
 
 import (
 	"os"
@@ -7,11 +7,12 @@ import (
 	"testing"
 
 	"github.com/mitchellh/cli"
+	"github.com/sloppyio/cli/command"
 	"github.com/sloppyio/cli/ui"
 )
 
 func TestStartCommand_implements(t *testing.T) {
-	c := &StartCommand{}
+	c := &command.StartCommand{}
 
 	if !strings.Contains(c.Help(), "Usage: sloppy start") {
 		t.Errorf("Help = %s", c.Help())
@@ -25,7 +26,7 @@ func TestStartCommand_implements(t *testing.T) {
 func TestStartCommand(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	projects := &mockProjectsEndpoint{}
-	c := &StartCommand{UI: mockUI, Projects: projects}
+	c := &command.StartCommand{UI: mockUI, Projects: projects}
 
 	extTests := []struct {
 		ext string
@@ -47,7 +48,7 @@ func TestStartCommand(t *testing.T) {
 func TestStartCommand_oneVarsFlag(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	projects := &mockProjectsEndpoint{}
-	c := &StartCommand{UI: mockUI, Projects: projects}
+	c := &command.StartCommand{UI: mockUI, Projects: projects}
 
 	args := []string{
 		"--var=memory:128,instances:1",
@@ -59,7 +60,7 @@ func TestStartCommand_oneVarsFlag(t *testing.T) {
 
 func TestStartCommand_notEnoughArgs(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &StartCommand{UI: mockUI}
+	c := &command.StartCommand{UI: mockUI}
 
 	args := []string{}
 
@@ -68,7 +69,7 @@ func TestStartCommand_notEnoughArgs(t *testing.T) {
 
 func TestStartCommand_notExistFile(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &StartCommand{UI: mockUI}
+	c := &command.StartCommand{UI: mockUI}
 
 	args := []string{
 		"nofile.json",
@@ -79,7 +80,7 @@ func TestStartCommand_notExistFile(t *testing.T) {
 
 func TestStartCommand_notSupportedFileExtension(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &StartCommand{UI: mockUI}
+	c := &command.StartCommand{UI: mockUI}
 
 	file, err := os.Create(filepath.Join(os.TempDir(), "a.notsupported"))
 	if err != nil {
@@ -97,7 +98,7 @@ func TestStartCommand_notSupportedFileExtension(t *testing.T) {
 
 func TestStartCommand_missingVariableValues(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &StartCommand{UI: mockUI}
+	c := &command.StartCommand{UI: mockUI}
 
 	args := []string{
 		"--var=instances:1",
@@ -109,7 +110,7 @@ func TestStartCommand_missingVariableValues(t *testing.T) {
 
 func TestStartCommand_flagsAfterArgument(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &StartCommand{UI: mockUI}
+	c := &command.StartCommand{UI: mockUI}
 
 	args := []string{
 		"testdata/testproject_variable.json",
@@ -122,7 +123,7 @@ func TestStartCommand_flagsAfterArgument(t *testing.T) {
 func TestStartCommand_invalidInputParameter(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	projects := &mockProjectsEndpoint{}
-	c := &StartCommand{UI: mockUI, Projects: projects}
+	c := &command.StartCommand{UI: mockUI, Projects: projects}
 
 	args := []string{
 		"testdata/testproject_invalid.json",
@@ -134,7 +135,7 @@ func TestStartCommand_invalidInputParameter(t *testing.T) {
 func TestStartCommand_invalidJSON(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	projects := &mockProjectsEndpoint{}
-	c := &StartCommand{UI: mockUI, Projects: projects}
+	c := &command.StartCommand{UI: mockUI, Projects: projects}
 
 	args := []string{
 		"testdata/testproject_invalidjson.json",
@@ -145,7 +146,7 @@ func TestStartCommand_invalidJSON(t *testing.T) {
 
 func TestStartCommand_incorrectFlags(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &StartCommand{UI: mockUI}
+	c := &command.StartCommand{UI: mockUI}
 
 	args := []string{
 		"-unknown",

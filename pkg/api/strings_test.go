@@ -3,11 +3,13 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package api
+package api_test
 
 import (
 	"testing"
 	"time"
+
+	"github.com/sloppyio/cli/pkg/api"
 )
 
 func TestStringify(t *testing.T) {
@@ -43,31 +45,31 @@ func TestStringify(t *testing.T) {
 
 		// pointers
 		{nilPointer, `<nil>`},
-		{String("foo"), `"foo"`},
-		{Int(123), `123`},
-		{Bool(false), `false`},
+		{api.String("foo"), `"foo"`},
+		{api.Int(123), `123`},
+		{api.Bool(false), `false`},
 		{
-			[]*string{String("a"), String("b")},
+			[]*string{api.String("a"), api.String("b")},
 			`["a" "b"]`,
 		},
 
 		// actual GitHub structs
 		{
-			Timestamp{time.Date(2006, 01, 02, 15, 04, 05, 0, time.UTC)},
+			api.Timestamp{time.Date(2006, 01, 02, 15, 04, 05, 0, time.UTC)},
 			`api.Timestamp{2006-01-02 15:04:05 +0000 UTC}`,
 		},
 		{
-			&Timestamp{time.Date(2006, 01, 02, 15, 04, 05, 0, time.UTC)},
+			&api.Timestamp{time.Date(2006, 01, 02, 15, 04, 05, 0, time.UTC)},
 			`api.Timestamp{2006-01-02 15:04:05 +0000 UTC}`,
 		},
 		{
-			App{ID: String("apache"), Instances: Int(5)},
+			api.App{ID: api.String("apache"), Instances: api.Int(5)},
 			`api.App{ID:"apache", Instances:5, EnvVars:map[]}`,
 		},
 	}
 
 	for i, tt := range tests {
-		s := Stringify(tt.in)
+		s := api.Stringify(tt.in)
 		if s != tt.out {
 			t.Errorf("%s", s)
 			t.Errorf("%d. Stringify(%q) => %q, want %q", i, tt.in, s, tt.out)

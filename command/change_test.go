@@ -1,4 +1,4 @@
-package command
+package command_test
 
 import (
 	"reflect"
@@ -9,10 +9,11 @@ import (
 
 	"github.com/sloppyio/cli/pkg/api"
 	"github.com/sloppyio/cli/ui"
+	"github.com/sloppyio/cli/command"
 )
 
 func TestChangeCommand_implements(t *testing.T) {
-	c := &ChangeCommand{}
+	c := &command.ChangeCommand{}
 
 	if !strings.Contains(c.Help(), "Usage: sloppy change") {
 		t.Errorf("Help = %s", c.Help())
@@ -26,7 +27,7 @@ func TestChangeCommand_implements(t *testing.T) {
 func TestChangeCommand_updateApp(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &ChangeCommand{UI: mockUI, Apps: apps}
+	c := &command.ChangeCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"-m", "1024",
@@ -61,7 +62,7 @@ func TestChangeCommand_updateApp(t *testing.T) {
 func TestChangeCommand_updateProject(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	projects := &mockProjectsEndpoint{}
-	c := &ChangeCommand{UI: mockUI, Projects: projects}
+	c := &command.ChangeCommand{UI: mockUI, Projects: projects}
 
 	extTests := []struct {
 		ext string
@@ -84,7 +85,7 @@ func TestChangeCommand_updateProject(t *testing.T) {
 func TestChangeCommand_updateProjecIncorrectOrder(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	projects := &mockProjectsEndpoint{}
-	c := &ChangeCommand{UI: mockUI, Projects: projects}
+	c := &command.ChangeCommand{UI: mockUI, Projects: projects}
 
 	args := []string{
 		"-var=memory:1024",
@@ -100,7 +101,7 @@ func TestChangeCommand_updateProjecIncorrectOrder(t *testing.T) {
 func TestChangeCommand_updateProjectBackwardCompatibility(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	projects := &mockProjectsEndpoint{}
-	c := &ChangeCommand{UI: mockUI, Projects: projects}
+	c := &command.ChangeCommand{UI: mockUI, Projects: projects}
 
 	extTests := []struct {
 		ext string
@@ -123,7 +124,7 @@ func TestChangeCommand_updateProjectBackwardCompatibility(t *testing.T) {
 
 func TestChangeCommand_notEnoughArgsApp(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &ChangeCommand{UI: mockUI}
+	c := &command.ChangeCommand{UI: mockUI}
 
 	args := []string{}
 
@@ -132,7 +133,7 @@ func TestChangeCommand_notEnoughArgsApp(t *testing.T) {
 
 func TestChangeCommand_notEnoughArgsAppNoFileNoAppPath(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &ChangeCommand{UI: mockUI}
+	c := &command.ChangeCommand{UI: mockUI}
 
 	args := []string{"noapppath"}
 
@@ -141,7 +142,7 @@ func TestChangeCommand_notEnoughArgsAppNoFileNoAppPath(t *testing.T) {
 
 func TestChangeCommand_invalidAppPath(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &ChangeCommand{UI: mockUI}
+	c := &command.ChangeCommand{UI: mockUI}
 
 	args := []string{
 		"letschat/frontend/node/node",
@@ -152,7 +153,7 @@ func TestChangeCommand_invalidAppPath(t *testing.T) {
 
 func TestChangeCommand_flagsAfterArgument(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &ChangeCommand{UI: mockUI}
+	c := &command.ChangeCommand{UI: mockUI}
 
 	args := []string{
 		"testdata/testproject_variable.json",
@@ -165,7 +166,7 @@ func TestChangeCommand_flagsAfterArgument(t *testing.T) {
 
 func TestChangeCommand_missingVariableValues(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &ChangeCommand{UI: mockUI}
+	c := &command.ChangeCommand{UI: mockUI}
 
 	args := []string{
 		"--var=instances:1",
@@ -179,7 +180,7 @@ func TestChangeCommand_notFoundCreate(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
 	projects := &mockProjectsEndpoint{}
-	c := &ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
+	c := &command.ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
 
 	args := []string{
 		"--var=instances:1",
@@ -194,7 +195,7 @@ func TestChangeCommand_notFoundCreateBackwardCompatibility(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
 	projects := &mockProjectsEndpoint{}
-	c := &ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
+	c := &command.ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
 
 	args := []string{
 		"--var=instances:1",
@@ -210,7 +211,7 @@ func TestChangeCommand_notFound(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
 	projects := &mockProjectsEndpoint{}
-	c := &ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
+	c := &command.ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
 
 	args := []string{
 		"--i=1",
@@ -224,7 +225,7 @@ func TestChangeCommand_missingOptions(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
 	projects := &mockProjectsEndpoint{}
-	c := &ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
+	c := &command.ChangeCommand{UI: mockUI, Apps: apps, Projects: projects}
 
 	args := []string{
 		"letschat/frontend/node",

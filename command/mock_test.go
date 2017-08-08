@@ -1,4 +1,4 @@
-package command
+package command_test
 
 import (
 	"fmt"
@@ -6,8 +6,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"sync"
 	"testing"
 	"time"
+
+	"github.com/mohae/deepcopy"
 
 	"github.com/sloppyio/cli/pkg/api"
 	"github.com/sloppyio/cli/ui"
@@ -36,53 +39,65 @@ func NewErrorResponse(statusCode int, message, reason string) *api.ErrorResponse
 
 // MockProjectsEndpoint
 type mockProjectsEndpoint struct {
+	m           sync.RWMutex
 	wantMessage string
 	project     string
 	input       *api.Project
 }
 
 func (m *mockProjectsEndpoint) Create(input *api.Project) (*api.Project, *http.Response, error) {
-	m.input = input
+	m.m.Lock()
+	defer m.m.Unlock()
 	if err := api.ValidateProject(input); err != nil {
 		return nil, nil, err
 	}
+	m.input = input
 	return input, nil, nil
 }
 
 func (m *mockProjectsEndpoint) List() ([]api.Project, *http.Response, error) {
+	m.m.RLock()
+	defer m.m.RUnlock()
 	if m.wantMessage != "" {
 		return nil, nil, NewErrorResponse(http.StatusNotFound, m.wantMessage, "")
 	}
 
+	p := deepcopy.Copy(mockProject)
+	project := p.(*api.Project)
+
 	result := []api.Project{
-		*mockProject,
+		*project,
 	}
 
-	// Just return the input
 	return result, nil, nil
 }
 
 func (m *mockProjectsEndpoint) Get(project string) (*api.Project, *http.Response, error) {
+	m.m.RLock()
+	defer m.m.RUnlock()
 	if project != "letschat" {
 		return nil, nil, NewErrorResponse(http.StatusNotFound,
 			fmt.Sprintf("Project with id \"%s\" could not be found", project), "")
 	}
 
-	result := mockProject
+	p := deepcopy.Copy(mockProject)
+	result := p.(*api.Project)
 
-	// Just return the input
 	return result, nil, nil
 }
 
 func (m *mockProjectsEndpoint) Update(project string, input *api.Project, force bool) (*api.Project, *http.Response, error) {
+	m.m.Lock()
+	defer m.m.Unlock()
 	if project != "letschat" {
 		return nil, nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Project with id \"%s\" could not be found", project), "")
 	}
 
-	result := mockProject
 	m.input = input
 
-	// Just return the input
+	p := deepcopy.Copy(mockProject)
+	result := p.(*api.Project)
+
 	return result, nil, nil
 }
 
@@ -97,55 +112,49 @@ func (m *mockProjectsEndpoint) Delete(project string, force bool) (*api.StatusRe
 		Message: "Project letschat successfully deleted.",
 	}
 
-	// Just return the input
 	return result, nil, nil
 }
 
-func (m *mockProjectsEndpoint) GetLogs(project string, limit int) (<-chan api.LogEntry, <-chan error) {
-	errCh := make(chan error, 1)
-	logCh := make(chan api.LogEntry)
-
+func (m *mockProjectsEndpoint) GetLogs(project string, limit int) (*api.LogEntry, error) {
 	if project != "letschat" {
-		errCh <- NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Project with id \"%s\" could not be found", project), "")
-		close(logCh)
-		close(errCh)
-		return logCh, errCh
+		return nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Project with id \"%s\" could not be found", project), "")
 	}
 
-	go func() {
-		logCh <- api.LogEntry{
-			Project:   api.String("letschat"),
-			Service:   api.String("frontend"),
-			App:       api.String("node"),
-			CreatedAt: &api.Timestamp{Time: time.Now()},
-			Log:       api.String("1234"),
-		}
-		close(logCh)
-		close(errCh)
-	}()
+	log := &api.LogEntry{
+		Project:   api.String("letschat"),
+		Service:   api.String("frontend"),
+		App:       api.String("node"),
+		CreatedAt: &api.Timestamp{Time: time.Now()},
+		Log:       api.String("1234"),
+	}
 
-	// Just return the input
-	return logCh, errCh
+	return log, nil
 }
 
 // mockServicesEndpoint
 type mockServicesEndpoint struct {
+	m           sync.RWMutex
 	wantMessage string
 	input       *api.Service
 }
 
 func (m *mockServicesEndpoint) Get(project, service string) (*api.Service, *http.Response, error) {
+	m.m.RLock()
+	defer m.m.RUnlock()
 	if project != "letschat" || service != "frontend" {
 		return nil, nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Service with id \"%s\" could not be found", service), "")
 	}
 
-	result := mockProject.Services[0]
+	s := deepcopy.Copy(mockProject.Services[0])
+	result := s.(*api.Service)
 
 	// Just return the input
 	return result, nil, nil
 }
 
 func (m *mockServicesEndpoint) Delete(project, service string, force bool) (*api.StatusResponse, *http.Response, error) {
+	m.m.Lock()
+	defer m.m.Unlock()
 	if project != "letschat" || service != "frontend" {
 		return nil, nil, NewErrorResponse(http.StatusNotFound,
 			fmt.Sprintf("Service with id \"%s\" could not be found", service), "")
@@ -160,47 +169,42 @@ func (m *mockServicesEndpoint) Delete(project, service string, force bool) (*api
 	return result, nil, nil
 }
 
-func (m *mockServicesEndpoint) GetLogs(project, service string, limit int) (<-chan api.LogEntry, <-chan error) {
-	errCh := make(chan error, 1)
-	logCh := make(chan api.LogEntry)
+func (m *mockServicesEndpoint) GetLogs(project, service string, limit int) (*api.LogEntry, error) {
+	m.m.RLock()
+	defer m.m.RUnlock()
 
 	if project != "letschat" || service != "frontend" {
-		errCh <- NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Service with id \"%s\" could not be found", service), "")
-		close(logCh)
-		close(errCh)
-		return logCh, errCh
+		return nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Service with id \"%s\" could not be found", service), "")
 	}
 
-	go func() {
-		logCh <- api.LogEntry{
-			Project:   api.String("letschat"),
-			Service:   api.String("frontend"),
-			App:       api.String("node"),
-			CreatedAt: &api.Timestamp{Time: time.Now()},
-			Log:       api.String("1234"),
-		}
-		close(logCh)
-		close(errCh)
-	}()
+	log := &api.LogEntry{
+		Project:   api.String("letschat"),
+		Service:   api.String("frontend"),
+		App:       api.String("node"),
+		CreatedAt: &api.Timestamp{Time: time.Now()},
+		Log:       api.String("1234"),
+	}
 
-	// Just return the input
-	return logCh, errCh
+	return log, nil
 }
 
 // mockAppsEndpoint
 type mockAppsEndpoint struct {
+	m           sync.RWMutex
 	wantMessage string
 	input       *api.App
 }
 
 func (m *mockAppsEndpoint) Get(project, service, app string) (*api.App, *http.Response, error) {
+	m.m.RLock()
+	defer m.m.RUnlock()
 	if project != "letschat" || service != "frontend" || app != "node" {
 		return nil, nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("App with id \"%s\" could not be found", app), "")
 	}
 
-	result := mockProject.Services[0].Apps[0]
+	a := deepcopy.Copy(mockProject.Services[0].Apps[0])
+	result := a.(*api.App)
 
-	// Just return the input
 	return result, nil, nil
 }
 
@@ -218,43 +222,50 @@ func (m *mockAppsEndpoint) Restart(project, service, app string) (*api.StatusRes
 }
 
 func (m *mockAppsEndpoint) Rollback(project, service, app, version string) (*api.App, *http.Response, error) {
+	m.m.RLock()
+	defer m.m.RUnlock()
 	if project != "letschat" || service != "frontend" || app != "node" {
 		return nil, nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("App with id \"%s\" could not be found", app), "")
 	}
-	result := mockProject.Services[0].Apps[0]
+
+	a := deepcopy.Copy(mockProject.Services[0].Apps[0])
+	result := a.(*api.App)
+
 	return result, nil, nil
 }
 
 func (m *mockAppsEndpoint) Scale(project, service, app string, n int) (*api.App, *http.Response, error) {
+	m.m.RLock()
+	defer m.m.RUnlock()
 	if project != "letschat" || service != "frontend" || app != "node" {
 		return nil, nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("App with id \"%s\" could not be found", app), "")
 	}
-	result := mockProject.Services[0].Apps[0]
+
+	a := deepcopy.Copy(mockProject.Services[0].Apps[0])
+	result := a.(*api.App)
+
 	return result, nil, nil
 }
 
-func (m *mockAppsEndpoint) GetLogs(project, service, app string, limit int) (<-chan api.LogEntry, <-chan error) {
-	errCh := make(chan error, 1)
-	logCh := make(chan api.LogEntry)
-
+func (m *mockAppsEndpoint) GetLogs(project, service, app string, limit int) (*api.LogEntry, error) {
 	if project != "letschat" || service != "frontend" || app != "node" {
-		errCh <- NewErrorResponse(http.StatusNotFound, fmt.Sprintf("App with id \"%s\" could not be found", app), "")
-		return logCh, errCh
+		return nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("App with id \"%s\" could not be found", app), "")
 	}
-
-	// Just return the input
-	return logCh, errCh
+	return nil, nil
 }
 
 func (m *mockAppsEndpoint) Update(project, service, app string, input *api.App) (*api.App, *http.Response, error) {
+	m.m.Lock()
+	defer m.m.Unlock()
 	if project != "letschat" || service != "frontend" || app != "node" {
 		return nil, nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("App with id \"%s\" could not be found", app), "")
 	}
 
-	result := mockProject.Services[0].Apps[0]
 	m.input = input
 
-	// Just return the input
+	a := deepcopy.Copy(mockProject.Services[0].Apps[0])
+	result := a.(*api.App)
+
 	return result, nil, nil
 }
 
@@ -269,7 +280,6 @@ func (m *mockAppsEndpoint) Delete(project, service, app string, force bool) (*ap
 		Message: "App node successfully deleted.",
 	}
 
-	// Just return the input
 	return result, nil, nil
 }
 
@@ -324,7 +334,6 @@ func (m *mockAppsEndpoint) GetMetrics(project, service, app string) (api.Metrics
 		},
 	}
 
-	// Just return the input
 	return result, nil, nil
 }
 
@@ -347,11 +356,11 @@ var mockProject = &api.Project{
 						{Port: api.Int(5000)},
 					},
 					Volumes: []*api.Volume{
-						&api.Volume{
+						{
 							Path: api.String("/var/www"),
 							Size: api.String("8GB"),
 						},
-						&api.Volume{
+						{
 							Path: api.String("/var/test"),
 							Size: api.String("8GB"),
 						},

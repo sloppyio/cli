@@ -1,4 +1,4 @@
-package command
+package command_test
 
 import (
 	"encoding/json"
@@ -9,10 +9,11 @@ import (
 	"github.com/mitchellh/cli"
 	"github.com/sloppyio/cli/pkg/api"
 	"github.com/sloppyio/cli/ui"
+	"github.com/sloppyio/cli/command"
 )
 
 func TestShowCommand_implements(t *testing.T) {
-	c := &ShowCommand{}
+	c := &command.ShowCommand{}
 
 	if !strings.Contains(c.Help(), "Usage: sloppy show") {
 		t.Errorf("Help = %s", c.Help())
@@ -28,7 +29,7 @@ func TestShowCommand_printProjects(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	testCodeAndOutput(t, mockUI, c.Run(nil), 0, "")
 }
@@ -38,7 +39,7 @@ func TestShowCommand_printServices(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	args := []string{
 		"letschat",
@@ -54,7 +55,7 @@ func TestShowCommand_printApps(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	args := []string{
 		"letschat/frontend",
@@ -68,7 +69,7 @@ func TestShowCommand_printApp(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/node",
@@ -82,7 +83,7 @@ func TestShowCommand_printRaw(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	args := []string{
 		"-r",
@@ -102,7 +103,7 @@ func TestShowCommand_printRaw(t *testing.T) {
 
 func TestShowCommand_invalidAppPath(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &ShowCommand{UI: mockUI}
+	c := &command.ShowCommand{UI: mockUI}
 
 	args := []string{
 		"letschat/frontend/apache/apache",
@@ -113,7 +114,7 @@ func TestShowCommand_invalidAppPath(t *testing.T) {
 
 func TestShowCommand_flagsAfterArgument(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &ShowCommand{UI: mockUI}
+	c := &command.ShowCommand{UI: mockUI}
 
 	args := []string{
 		"letschat/frontend/apache/apache",
@@ -128,7 +129,7 @@ func TestShowCommand_notFound(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.ShowCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	args := []string{
 		"abc/def",

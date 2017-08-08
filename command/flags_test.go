@@ -1,12 +1,14 @@
-package command
+package command_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/sloppyio/cli/command"
 )
 
 func TestStringMap(t *testing.T) {
-	var m stringMap
+	var m command.StringMap
 
 	if err := m.Set("memory:128"); err != nil {
 		t.Errorf("Unexpected error: %v", err)
@@ -16,7 +18,7 @@ func TestStringMap(t *testing.T) {
 		t.Errorf("Unexpected error: %v", err)
 	}
 
-	var want = stringMap{
+	var want = command.StringMap{
 		"memory":    "128",
 		"instances": "1",
 		"volume":    "1",

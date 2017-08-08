@@ -1,4 +1,4 @@
-package command
+package command_test
 
 import (
 	"strings"
@@ -6,10 +6,11 @@ import (
 
 	"github.com/mitchellh/cli"
 	"github.com/sloppyio/cli/ui"
+	"github.com/sloppyio/cli/command"
 )
 
 func TestDeleteCommand_implements(t *testing.T) {
-	c := &DeleteCommand{}
+	c := &command.DeleteCommand{}
 
 	if !strings.Contains(c.Help(), "Usage: sloppy delete") {
 		t.Errorf("Help = %s", c.Help())
@@ -25,7 +26,7 @@ func TestDeleteCommand_deleteProject(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &DeleteCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.DeleteCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	args := []string{
 		"letschat",
@@ -39,7 +40,7 @@ func TestDeleteCommand_deleteService(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &DeleteCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.DeleteCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	args := []string{
 		"letschat/frontend",
@@ -53,7 +54,7 @@ func TestDeleteCommand_deleteApp(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &DeleteCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.DeleteCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/node",
@@ -67,7 +68,7 @@ func TestDeleteCommand_notFound(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &DeleteCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.DeleteCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/node1",
@@ -81,7 +82,7 @@ func TestDeleteCommand_flagsAfterArgument(t *testing.T) {
 	projects := &mockProjectsEndpoint{}
 	services := &mockServicesEndpoint{}
 	apps := &mockAppsEndpoint{}
-	c := &DeleteCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
+	c := &command.DeleteCommand{UI: mockUI, Projects: projects, Services: services, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/node",
@@ -93,7 +94,7 @@ func TestDeleteCommand_flagsAfterArgument(t *testing.T) {
 
 func TestDeleteCommand_notEnoughArgs(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &DeleteCommand{UI: mockUI}
+	c := &command.DeleteCommand{UI: mockUI}
 
 	args := []string{}
 
@@ -102,7 +103,7 @@ func TestDeleteCommand_notEnoughArgs(t *testing.T) {
 
 func TestDeleteCommand_invalidAppPath(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &DeleteCommand{UI: mockUI}
+	c := &command.DeleteCommand{UI: mockUI}
 
 	args := []string{
 		"letschat/frontend/apache/apache",

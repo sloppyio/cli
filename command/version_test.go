@@ -1,15 +1,16 @@
-package command
+package command_test
 
 import (
 	"strings"
 	"testing"
 
 	"github.com/mitchellh/cli"
+	"github.com/sloppyio/cli/command"
 	"github.com/sloppyio/cli/ui"
 )
 
 func TestVersionCommand_implements(t *testing.T) {
-	c := &VersionCommand{}
+	c := &command.VersionCommand{}
 
 	if !strings.Contains(c.Help(), "") {
 		t.Errorf("Help = %s", c.Help())
@@ -22,8 +23,8 @@ func TestVersionCommand_implements(t *testing.T) {
 
 func TestVersionCommand(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: new(cli.MockUi)}
-	Version, VersionPreRelease, GitCommit = "0.0.1", "dev", "1b33f1"
-	c := &VersionCommand{
+	command.Version, command.VersionPreRelease, command.GitCommit = "0.0.1", "dev", "1b33f1"
+	c := &command.VersionCommand{
 		CheckVersion: func() (bool, string) {
 			return false, ""
 		},

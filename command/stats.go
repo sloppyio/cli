@@ -82,7 +82,7 @@ func (c *StatsCommand) Run(args []string) int {
 	var buf bytes.Buffer
 	w := new(tabwriter.Writer)
 	w.Init(&buf, 0, 8, 0, '\t', 0)
-	fmt.Fprintf(w, "CONTAINER \t CPU %% \t MEM / LIMIT \t MEM %% \t NET I/O Extern \t NET I/O Intern \t MAX VOLUME %% \t LAST UPDATE \n")
+	fmt.Fprintf(w, "CONTAINER \t CPU %% \t MEM / LIMIT \t MEM %% \t NET I/O Extern \t NET I/O Intern \t MAX VOLUME %% \t LAST UPDATE\n")
 
 	var keys []string
 	var latest api.Timestamp
@@ -165,6 +165,7 @@ type MetricFetchResult struct {
 }
 
 func (m Metrics) Len() int { return len(m) }
+
 // Volume metrics needs to be the last one due to their missing uuid
 func (m Metrics) Less(i, j int) bool { return strings.Contains(m[j].metricName, "volume") }
 func (m Metrics) Swap(i, j int)      { m[i], m[j] = m[j], m[i] }
@@ -232,7 +233,7 @@ func (c *StatsCommand) aggregate(metrics []*Metric) (map[string]*stat, error) {
 	stats := make(map[string]*stat)
 	regex := regexp.MustCompile(`^(\w+)-(\w+).([a-z0-9-]{36}|([a-z/+]+)$)`)
 	var id string
-	p := &stat{}
+	var p stat
 	for _, metric := range metrics {
 		matches := regex.FindStringSubmatch(metric.seriesName)
 		if len(matches) == 0 || len(matches) < 3 {
@@ -283,7 +284,7 @@ func (c *StatsCommand) aggregate(metrics []*Metric) (map[string]*stat, error) {
 			}
 		}
 		stats[id] = s
-		p = s // merge next with previous one
+		p = *s // merge next with previous one
 	}
 	return stats, nil
 }

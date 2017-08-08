@@ -57,5 +57,8 @@ shell:
 bundle:
 	mkdir -p bundles
 
+coverage-show:
+	go tool cover -html=coverage.txt
+
 clean:
 	rm -rf bundles

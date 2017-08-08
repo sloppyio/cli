@@ -1,4 +1,4 @@
-package command
+package command_test
 
 import (
 	"strings"
@@ -6,10 +6,11 @@ import (
 
 	"github.com/mitchellh/cli"
 	"github.com/sloppyio/cli/ui"
+	"github.com/sloppyio/cli/command"
 )
 
 func TestScaleCommand_implements(t *testing.T) {
-	c := &ScaleCommand{}
+	c := &command.ScaleCommand{}
 
 	if !strings.Contains(c.Help(), "Usage: sloppy scale") {
 		t.Errorf("Help = %s", c.Help())
@@ -23,7 +24,7 @@ func TestScaleCommand_implements(t *testing.T) {
 func TestScaleCommand(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &ScaleCommand{UI: mockUI, Apps: apps}
+	c := &command.ScaleCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/node",
@@ -34,7 +35,7 @@ func TestScaleCommand(t *testing.T) {
 
 func TestScaleCommand_invalidAppPath(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &ScaleCommand{UI: mockUI}
+	c := &command.ScaleCommand{UI: mockUI}
 
 	args := []string{
 		"letschat/frontend/node/node",
@@ -45,7 +46,7 @@ func TestScaleCommand_invalidAppPath(t *testing.T) {
 
 func TestScaleCommand_notEnoughArgs(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	c := &ScaleCommand{UI: mockUI}
+	c := &command.ScaleCommand{UI: mockUI}
 
 	args := []string{}
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "minimum of 2 arguments")
@@ -54,7 +55,7 @@ func TestScaleCommand_notEnoughArgs(t *testing.T) {
 func TestScaleCommand_notFound(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &ScaleCommand{UI: mockUI, Apps: apps}
+	c := &command.ScaleCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/apache",
@@ -66,7 +67,7 @@ func TestScaleCommand_notFound(t *testing.T) {
 func TestScaleCommand_invalidArgument(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	apps := &mockAppsEndpoint{}
-	c := &ScaleCommand{UI: mockUI, Apps: apps}
+	c := &command.ScaleCommand{UI: mockUI, Apps: apps}
 
 	args := []string{
 		"letschat/frontend/apache",

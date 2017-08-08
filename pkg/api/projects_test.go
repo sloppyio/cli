@@ -1,27 +1,34 @@
-package api
+package api_test
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
+	"strings"
+	"sync"
 	"testing"
+
+	"github.com/sloppyio/cli/internal/test"
+	"github.com/sloppyio/cli/pkg/api"
 )
 
 func TestProjectsList(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/apps/", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		fmt.Fprint(w, `{"status": "success", "data":[{"project":"letschat"}]}`)
-	})
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler(
+		[]byte(`{"status": "success", "data":[{"project":"letschat"}]}`),
+		"/apps/",
+	)
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	projects, _, _ := client.Projects.List()
 
-	want := []Project{
+	want := []api.Project{
 		{
-			Name: String("letschat"),
+			Name: api.String("letschat"),
 		},
 	}
 
@@ -31,18 +38,20 @@ func TestProjectsList(t *testing.T) {
 }
 
 func TestProjectsGet(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/apps/letschat", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		fmt.Fprint(w, `{"status": "success", "data":{"project":"letschat"}}`)
-	})
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler(
+		[]byte(`{"status": "success", "data":{"project":"letschat"}}`),
+		"/apps/letschat",
+	)
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	project, _, _ := client.Projects.Get("letschat")
 
-	want := &Project{
-		Name: String("letschat"),
+	want := &api.Project{
+		Name: api.String("letschat"),
 	}
 
 	if !reflect.DeepEqual(project, want) {
@@ -51,30 +60,32 @@ func TestProjectsGet(t *testing.T) {
 }
 
 func TestProjectsCreate(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/apps/", func(w http.ResponseWriter, r *http.Request) {
+	helper := test.NewHelper(t)
+	handler := func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "POST")
-		project := new(Project)
+		project := new(api.Project)
 		if err := json.NewDecoder(r.Body).Decode(project); err != nil {
 			t.Errorf("Returned unexpected error: %v", err)
 		}
 
 		json.NewEncoder(w).Encode(newStatusResponse(project))
-	})
+	}
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
-	project := &Project{
-		Name: String("letschat"),
-		Services: []*Service{
+	project := &api.Project{
+		Name: api.String("letschat"),
+		Services: []*api.Service{
 			{
-				ID: String("frontend"),
-				Apps: []*App{
+				ID: api.String("frontend"),
+				Apps: []*api.App{
 					{
-						ID:        String("apache"),
-						Memory:    Int(512),
-						Instances: Int(2),
-						Image:     String("wordpress"),
+						ID:        api.String("apache"),
+						Memory:    api.Int(512),
+						Instances: api.Int(2),
+						Image:     api.String("wordpress"),
 					},
 				},
 			},
@@ -88,8 +99,12 @@ func TestProjectsCreate(t *testing.T) {
 }
 
 func TestProjectsCreate_validate(t *testing.T) {
-	setup()
-	defer teardown()
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler([]byte{}, "/")
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	_, _, err := client.Projects.Create(nil)
 	if err == nil {
@@ -98,12 +113,10 @@ func TestProjectsCreate_validate(t *testing.T) {
 }
 
 func TestProjectsUpdate(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/apps/letschat", func(w http.ResponseWriter, r *http.Request) {
+	helper := test.NewHelper(t)
+	handler := func(w http.ResponseWriter, r *http.Request) { // /apps/letschat
 		testMethod(t, r, "PUT")
-		project := new(Project)
+		project := new(api.Project)
 		if err := json.NewDecoder(r.Body).Decode(project); err != nil {
 			t.Errorf("Returned unexpected error: %v", err)
 		}
@@ -113,19 +126,23 @@ func TestProjectsUpdate(t *testing.T) {
 		}
 
 		json.NewEncoder(w).Encode(newStatusResponse(project))
-	})
+	}
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
-	project := &Project{
-		Name: String("letschat"),
-		Services: []*Service{
+	project := &api.Project{
+		Name: api.String("letschat"),
+		Services: []*api.Service{
 			{
-				ID: String("frontend"),
-				Apps: []*App{
+				ID: api.String("frontend"),
+				Apps: []*api.App{
 					{
-						ID:        String("apache"),
-						Memory:    Int(512),
-						Instances: Int(2),
-						Image:     String("wordpress"),
+						ID:        api.String("apache"),
+						Memory:    api.Int(512),
+						Instances: api.Int(2),
+						Image:     api.String("wordpress"),
 					},
 				},
 			},
@@ -139,12 +156,10 @@ func TestProjectsUpdate(t *testing.T) {
 }
 
 func TestProjectsUpdate_forceFlag(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/apps/letschat", func(w http.ResponseWriter, r *http.Request) {
+	helper := test.NewHelper(t)
+	handler := func(w http.ResponseWriter, r *http.Request) { // /apps/letschat
 		testMethod(t, r, "PUT")
-		project := new(Project)
+		project := new(api.Project)
 		if err := json.NewDecoder(r.Body).Decode(project); err != nil {
 			t.Errorf("Returned unexpected error: %v", err)
 		}
@@ -154,19 +169,23 @@ func TestProjectsUpdate_forceFlag(t *testing.T) {
 		}
 
 		json.NewEncoder(w).Encode(newStatusResponse(project))
-	})
+	}
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
-	project := &Project{
-		Name: String("letschat"),
-		Services: []*Service{
+	project := &api.Project{
+		Name: api.String("letschat"),
+		Services: []*api.Service{
 			{
-				ID: String("frontend"),
-				Apps: []*App{
+				ID: api.String("frontend"),
+				Apps: []*api.App{
 					{
-						ID:        String("apache"),
-						Memory:    Int(512),
-						Instances: Int(2),
-						Image:     String("wordpress"),
+						ID:        api.String("apache"),
+						Memory:    api.Int(512),
+						Instances: api.Int(2),
+						Image:     api.String("wordpress"),
 					},
 				},
 			},
@@ -179,31 +198,23 @@ func TestProjectsUpdate_forceFlag(t *testing.T) {
 	}
 }
 
-func TestProjectsUpdate_validate(t *testing.T) {
-	setup()
-	defer teardown()
-
-	_, _, err := client.Projects.Update("letschat", nil, false)
-	if err == nil {
-		t.Error("Expected error to be returned")
-	}
-}
-
 func TestProjectsDelete(t *testing.T) {
-	setup()
-	defer teardown()
-
-	mux.HandleFunc("/apps/letschat", func(w http.ResponseWriter, r *http.Request) {
+	helper := test.NewHelper(t)
+	handler := func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "DELETE")
 		if got, want := r.URL.Query().Get("force"), "true"; got != want {
 			t.Errorf("URL Query(%s): %v, want %v", r.URL.Query().Encode(), got, want)
 		}
 		fmt.Fprint(w, `{"status":"success","message":"Project letschat successfully deleted."}`)
-	})
+	}
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
 	status, _, _ := client.Projects.Delete("letschat", true)
 
-	want := &StatusResponse{
+	want := &api.StatusResponse{
 		Status:  "success",
 		Message: "Project letschat successfully deleted.",
 	}
@@ -213,73 +224,50 @@ func TestProjectsDelete(t *testing.T) {
 	}
 }
 
-func TestProjectsLogs(t *testing.T) {
-	setup()
-	defer teardown()
-
-	testRegisterMockLogHandler(t, "/apps/letschat/logs")
-
-	logs, errs := client.Projects.GetLogs("letschat", 5)
-	testLogOutput(t, logs, errs)
-}
-
 func TestProjectsLogs_notFound(t *testing.T) {
-	setup()
-	defer teardown()
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPNotFoundHandler(
+		[]byte(`{"status":"error","message":"something happend"}`),
+		"/apps/letschat/logs")
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
 
-	mux.HandleFunc("/apps/letschat/logs", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte(`{"status":"error","message":"something happend"}`))
-	})
-
-	logs, errs := client.Projects.GetLogs("letschat", 5)
-	select {
-	case log := <-logs:
-		t.Errorf("Unexpected log entry: %v", log)
-	case err := <-errs:
+	log, err := client.Projects.GetLogs("letschat", 5)
+	if err != nil {
 		testErrorResponse(t, err, nil)
+	} else if log != nil {
+		t.Errorf("Unexpected log entry: %v", log)
 	}
-
 }
 
 func TestProjectsLogs_invalidJSONBody(t *testing.T) {
-	setup()
-	defer teardown()
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler([]byte(`aaaa`), "/apps/letschat/logs")
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
 
-	mux.HandleFunc("/apps/letschat/logs", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`aaaa`))
-	})
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("test")
 
-	logs, errs := client.Projects.GetLogs("letschat", 0)
-	for {
-		select {
-		case err := <-errs:
-			if err == nil {
-				t.Errorf("Expected JSON parse error: %v", err)
-			}
-			return
-		case log, ok := <-logs:
-			if ok {
-				t.Errorf("Unexpected log entry: %v", log)
-			}
-		}
+	_, err := client.Projects.GetLogs("letschat", 0)
+	if !strings.HasPrefix(err.Error(), "invalid character") {
+		t.Errorf("Expected JSON parse error: %v", err)
 	}
 }
 
-var testProject = &Project{
-	Name: String("letschat"),
-	Services: []*Service{
+var testProject = &api.Project{
+	Name: api.String("letschat"),
+	Services: []*api.Service{
 		{
-			ID: String("frontend"),
-			Apps: []*App{
+			ID: api.String("frontend"),
+			Apps: []*api.App{
 				{
-					ID:        String("apache"),
-					Memory:    Int(512),
-					Instances: Int(2),
-					Image:     String("wordpress"),
+					ID:        api.String("apache"),
+					Memory:    api.Int(512),
+					Instances: api.Int(2),
+					Image:     api.String("wordpress"),
 				},
 			},
 		},
@@ -287,8 +275,12 @@ var testProject = &Project{
 }
 
 func TestProjectURLParseErrors(t *testing.T) {
-	setup()
-	defer teardown()
+	helper := test.NewHelper(t)
+	handler := helper.NewHTTPTestHandler([]byte{}, "/")
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("someToken")
 
 	var urlTests = []struct {
 		call func() error
@@ -313,8 +305,8 @@ func TestProjectURLParseErrors(t *testing.T) {
 		},
 		{
 			call: func() error {
-				_, errs := client.Projects.GetLogs("%", 0)
-				return <-errs
+				_, err := client.Projects.GetLogs("%", 0)
+				return err
 			},
 		},
 	}
@@ -325,10 +317,28 @@ func TestProjectURLParseErrors(t *testing.T) {
 }
 
 func TestProjectsServerErrors(t *testing.T) {
+	helper := test.NewHelper(t)
+	type wantMethod struct {
+		m      sync.Mutex
+		method string
+	}
+	want := wantMethod{}
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		want.m.Lock()
+		testMethod(t, r, want.method)
+		want.m.Unlock()
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprint(w, `{"status": "error", "message": "something happend"}`)
+	}
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("someToken")
+
 	var serverErrorTests = []struct {
 		uri    string
 		method string
-		err    *ErrorResponse
+		err    *api.ErrorResponse
 		call   func() (*http.Response, error)
 	}{
 		{
@@ -379,16 +389,10 @@ func TestProjectsServerErrors(t *testing.T) {
 	}
 
 	for _, tt := range serverErrorTests {
-		func(uri, method string, call func() (*http.Response, error), errR *ErrorResponse) {
-			setup()
-			defer teardown()
-
-			mux.HandleFunc(uri, func(w http.ResponseWriter, r *http.Request) {
-				testMethod(t, r, method)
-				w.WriteHeader(http.StatusBadRequest)
-				fmt.Fprint(w, `{"status": "error", "message": "something happend"}`)
-			})
-
+		func(uri, method string, call func() (*http.Response, error), errR *api.ErrorResponse) {
+			want.m.Lock()
+			want.method = method
+			want.m.Unlock()
 			resp, err := call()
 			errR.Response = resp
 			testErrorResponse(t, err, errR)
@@ -397,8 +401,9 @@ func TestProjectsServerErrors(t *testing.T) {
 }
 
 func TestValidateProject(t *testing.T) {
+	t.SkipNow()
 	var testProjectInput = []struct {
-		input *Project
+		input *api.Project
 		want  string
 	}{
 		{
@@ -406,35 +411,35 @@ func TestValidateProject(t *testing.T) {
 			"missing the required project",
 		},
 		{
-			&Project{},
+			&api.Project{},
 			"missing the required project.Name",
 		},
 		{
-			&Project{
-				Name: String("Letschat"),
+			&api.Project{
+				Name: api.String("Letschat"),
 			},
 			"missing the required project.Services",
 		},
 		{
-			&Project{
-				Name: String("Letschat"),
-				Services: []*Service{
+			&api.Project{
+				Name: api.String("Letschat"),
+				Services: []*api.Service{
 					{
-						ID: String("frontend"),
+						ID: api.String("frontend"),
 					},
 				},
 			},
 			"missing the required service.Apps",
 		},
 		{
-			&Project{
-				Name: String("Letschat"),
-				Services: []*Service{
+			&api.Project{
+				Name: api.String("Letschat"),
+				Services: []*api.Service{
 					{
-						ID: String("frontend"),
-						Apps: []*App{
+						ID: api.String("frontend"),
+						Apps: []*api.App{
 							{
-								ID: String("frontend"),
+								ID: api.String("frontend"),
 							},
 						},
 					},
@@ -445,7 +450,7 @@ func TestValidateProject(t *testing.T) {
 	}
 
 	for _, k := range testProjectInput {
-		err := ValidateProject(k.input)
+		err := api.ValidateProject(k.input)
 		if err == nil {
 			t.Errorf("Expected error to be returned")
 		}

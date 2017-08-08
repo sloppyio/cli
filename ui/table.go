@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -183,20 +184,20 @@ func listApp(w io.Writer, app *api.App) {
 	}
 
 	if len(app.PortMappings) == 0 {
-		fmt.Fprintf(&buf, "Ports:\t\t -\n")
+		fmt.Fprint(&buf, "Ports:\t\t -\n")
 	} else {
-		fmt.Fprintf(&buf, "Ports:")
+		fmt.Fprint(&buf, "Ports:")
 	}
 	for _, value := range app.PortMappings {
 		fmt.Fprintf(&buf, "\t\t %d\n", *value.Port)
 	}
 
 	if app.Logging != nil {
-		fmt.Fprintf(&buf, "Logging:\n")
+		fmt.Fprint(&buf, "Logging:\n")
 		if app.Logging.Driver != nil {
 			fmt.Fprintf(&buf, "  Driver:\t %s\n", *app.Logging.Driver)
 		} else {
-			fmt.Fprintf(&buf, "  Driver:\t -\n")
+			fmt.Fprint(&buf, "  Driver:\t -\n")
 		}
 		first := true
 		for k, v := range app.Logging.Options {
@@ -211,20 +212,15 @@ func listApp(w io.Writer, app *api.App) {
 
 	listing(&buf, "Dependencies", "\t", "\t\t", app.Dependencies)
 
-	if len(app.EnvVars) == 0 {
-		fmt.Fprintf(&buf, "Environments:\t -\n")
-	} else {
-		fmt.Fprintf(&buf, "Environments:")
-	}
-	var first = true
+	envs := []string{}
 	for key, value := range app.EnvVars {
-		t := "\t"
-		if !first {
-			t = "\t\t"
-		}
-		first = false
-		fmt.Fprintf(&buf, t+" %s=\"%s\"\n", key, value)
+		envs = append(envs, fmt.Sprintf("%s=%q", key, value))
 	}
+	sort.Strings(envs) // ensure always the same output
+	if len(app.EnvVars) == 0 {
+		envs = append(envs, "-")
+	}
+	fmt.Fprintf(&buf, "Environments:\t %s\n", strings.Join(envs, "\n\t\t "))
 
 	listing(&buf, "Versions", "\t", "\t\t", app.Versions)
 
