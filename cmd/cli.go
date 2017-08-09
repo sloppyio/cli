@@ -1,3 +1,4 @@
+//go:generate goversioninfo -icon=./../resources/sloppy.ico -manifest=./../resources/sloppy.exe.manifest ./../versioninfo.json
 package main
 
 import (

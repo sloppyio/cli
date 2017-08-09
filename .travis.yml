@@ -15,8 +15,8 @@ install:
 script:
 - make build
 - make test
-- make
 - make coverage-report
+- make
 matrix:
   fast_finish: true
   allow_failures:

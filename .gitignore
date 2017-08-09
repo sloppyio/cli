@@ -18,3 +18,6 @@ Thumbs.db
 # Go test output
 /*.cover
 /coverage.txt
+
+# Go generate output
+*.syso

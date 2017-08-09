@@ -31,18 +31,8 @@ source "${__scripts}/.version.sh"
 if [ "${output}" != "sloppy" ]; then
   output="sloppy-${GOOS}-${GOARCH}"
   if [ $GOOS = "windows" ]; then
-    # Generate windows resources
-    BUILD_VERSION_COMMA=$(echo -n $BUILD_VERSION_SUFFIX.0 | sed -re 's/^([0-9.]*).*$/\1/' | tr . ,)
-    defs=
-    [ ! -z $BUILD_VERSION_SUFFIX ] && defs="$defs -D BUILD_VERSION=\"$BUILD_VERSION_SUFFIX\""
-	  [ ! -z $BUILD_VERSION_COMMA ]  && defs="$defs -D BUILD_VERSION_COMMA=$BUILD_VERSION_COMMA"
-
-    /usr/bin/x86_64-w64-mingw32-windres \
-      -i "${__resources}/sloppy.rc" \
-      -F pe-x86-64 \
-      -o "${__src}/rsrc_amd64.syso" \
-      --use-temp-file \
-      $defs
+    echo "Generating windows resources..."
+    go generate ./cmd
     output="${output}.exe"
   fi
 fi
@@ -60,7 +50,7 @@ go build \
 
 # Cleanup
 if [ ${GOOS} = "windows" ]; then
-  rm "${__src}/rsrc_amd64.syso"
+  rm "${__src}/cmd/resource.syso"
 fi
 
 if [ $? == 0 ]; then

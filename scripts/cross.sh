@@ -3,7 +3,7 @@ set -e
 
 echo "Start cross-compiling sloppy"
 echo
-for GOOS in darwin linux; do # windows
+for GOOS in darwin linux windows; do
   export GOOS=$GOOS
   for GOARCH in amd64; do
     export GOARCH=$GOARCH
