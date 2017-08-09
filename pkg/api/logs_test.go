@@ -2,9 +2,12 @@ package api_test
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"testing"
 	"time"
 
+	"github.com/sloppyio/cli/internal/test"
 	"github.com/sloppyio/cli/pkg/api"
 )
 
@@ -45,16 +48,38 @@ func TestTimestampUnmarshal_invalidTimestamp(t *testing.T) {
 	}
 }
 
-func testLogOutput(t *testing.T, logs <-chan api.LogEntry, errs <-chan error) {
-	for i := 0; i < 5; i++ {
-		want := fmt.Sprintf("frontend-%d", i)
+func TestRetrieveLogs(t *testing.T) {
+	helper := test.NewHelper(t)
+	handler := func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Transfer-Encoding", "chunked")
+		for i := 0; i < 10; i++ {
+			w.Write([]byte(fmt.Sprintf(`{"body": "chunk-%d"}`, i+1)))
+			time.Sleep(time.Second / 10)
+		}
+	}
+	server := helper.NewAPIServer(handler)
+	defer server.Close()
+	client := helper.NewClient(server.Listener.Addr())
+	client.SetAccessToken("testToken")
+
+	logs, errors := api.RetrieveLogs(client, "/", 0)
+	entries := make([]api.LogEntry, 0)
+	for {
 		select {
-		case log, ok := <-logs:
-			if ok && *log.Service != want {
-				t.Errorf("Log.Service = %v, want %v", *log.Service, want)
+		case err := <-errors:
+			if err != io.EOF {
+				t.Error(err)
 			}
-		case err := <-errs:
-			t.Errorf("Unexpected error: %v", err)
+			return
+		case entry, ok := <-logs:
+			if !ok {
+				if len(entries) != 10 {
+					t.Errorf("Expected 10 entries, got: %d", len(entries))
+				}
+				return
+			}
+			entries = append(entries, entry)
 		}
 	}
 }

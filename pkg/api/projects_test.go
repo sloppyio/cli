@@ -234,10 +234,11 @@ func TestProjectsLogs_notFound(t *testing.T) {
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
-	log, err := client.Projects.GetLogs("letschat", 5)
-	if err != nil {
+	logs, errors := client.Projects.GetLogs("letschat", 5)
+	select {
+	case err := <-errors:
 		testErrorResponse(t, err, nil)
-	} else if log != nil {
+	case log := <-logs:
 		t.Errorf("Unexpected log entry: %v", log)
 	}
 }
@@ -251,9 +252,14 @@ func TestProjectsLogs_invalidJSONBody(t *testing.T) {
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("test")
 
-	_, err := client.Projects.GetLogs("letschat", 0)
-	if !strings.HasPrefix(err.Error(), "invalid character") {
-		t.Errorf("Expected JSON parse error: %v", err)
+	logs, errors := client.Projects.GetLogs("letschat", 0)
+	select {
+	case err := <-errors:
+		if !strings.HasPrefix(err.Error(), "invalid character") {
+			t.Errorf("Expected JSON parse error: %v", err)
+		}
+	case log := <-logs:
+		t.Errorf("Unexpected log entry: %v", log)
 	}
 }
 
@@ -306,7 +312,7 @@ func TestProjectURLParseErrors(t *testing.T) {
 		{
 			call: func() error {
 				_, err := client.Projects.GetLogs("%", 0)
-				return err
+				return <-err
 			},
 		},
 	}

@@ -149,9 +149,7 @@ func (c *Client) Do(req *http.Request, v interface{}) (*http.Response, error) {
 	}
 
 	if v != nil {
-		switch t := v.(type) {
-		case io.Writer:
-			_, err = io.Copy(t, resp.Body)
+		switch v.(type) {
 		case *StatusResponse:
 			err = json.NewDecoder(resp.Body).Decode(v)
 		default:

@@ -128,11 +128,11 @@ func (p *ProjectsEndpoint) Delete(name string, force bool) (*StatusResponse, *ht
 }
 
 // GetLogs returns logs for all apps included in a specific project.
-func (p *ProjectsEndpoint) GetLogs(name string, limit int) (*LogEntry, error) {
+func (p *ProjectsEndpoint) GetLogs(name string, limit int) (<-chan LogEntry, <-chan error) {
 
 	u := fmt.Sprintf("apps/%s/logs", name)
 
-	return retrieveLogs(p.client, u, limit)
+	return RetrieveLogs(p.client, u, limit)
 }
 
 // ValidateProject checks whether project's attributes are missing.
@@ -190,7 +190,7 @@ type ProjectsDeleter interface {
 
 // ProjectsLogger is an interface which provides the getLogs method.
 type ProjectsLogger interface {
-	GetLogs(project string, limit int) (*LogEntry, error)
+	GetLogs(project string, limit int) (<-chan LogEntry, <-chan error)
 }
 
 // ProjectsCreater is an interface which provides the Create method.

@@ -7,9 +7,9 @@ import (
 
 	"github.com/mitchellh/cli"
 
+	"github.com/sloppyio/cli/command"
 	"github.com/sloppyio/cli/pkg/api"
 	"github.com/sloppyio/cli/ui"
-	"github.com/sloppyio/cli/command"
 )
 
 func TestChangeCommand_implements(t *testing.T) {

@@ -115,20 +115,29 @@ func (m *mockProjectsEndpoint) Delete(project string, force bool) (*api.StatusRe
 	return result, nil, nil
 }
 
-func (m *mockProjectsEndpoint) GetLogs(project string, limit int) (*api.LogEntry, error) {
-	if project != "letschat" {
-		return nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Project with id \"%s\" could not be found", project), "")
-	}
+func (m *mockProjectsEndpoint) GetLogs(project string, limit int) (<-chan api.LogEntry, <-chan error) {
+	logs := make(chan api.LogEntry)
+	errors := make(chan error)
 
-	log := &api.LogEntry{
-		Project:   api.String("letschat"),
-		Service:   api.String("frontend"),
-		App:       api.String("node"),
-		CreatedAt: &api.Timestamp{Time: time.Now()},
-		Log:       api.String("1234"),
-	}
+	go func() {
+		if project != "letschat" {
+			errors <- NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Project with id \"%s\" could not be found", project), "")
+			close(errors)
+			return
+		}
 
-	return log, nil
+		log := api.LogEntry{
+			Project:   api.String("letschat"),
+			Service:   api.String("frontend"),
+			App:       api.String("node"),
+			CreatedAt: &api.Timestamp{Time: time.Now()},
+			Log:       api.String("1234"),
+		}
+		logs <- log
+		close(logs)
+	}()
+
+	return logs, errors
 }
 
 // mockServicesEndpoint
@@ -169,23 +178,28 @@ func (m *mockServicesEndpoint) Delete(project, service string, force bool) (*api
 	return result, nil, nil
 }
 
-func (m *mockServicesEndpoint) GetLogs(project, service string, limit int) (*api.LogEntry, error) {
-	m.m.RLock()
-	defer m.m.RUnlock()
+func (m *mockServicesEndpoint) GetLogs(project, service string, limit int) (<-chan api.LogEntry, <-chan error) {
+	logs := make(chan api.LogEntry)
+	errors := make(chan error)
 
-	if project != "letschat" || service != "frontend" {
-		return nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Service with id \"%s\" could not be found", service), "")
-	}
+	go func() {
+		if project != "letschat" || service != "frontend" {
+			errors <- NewErrorResponse(http.StatusNotFound, fmt.Sprintf("Project with id \"%s\" could not be found", project), "")
+			close(errors)
+			return
+		}
 
-	log := &api.LogEntry{
-		Project:   api.String("letschat"),
-		Service:   api.String("frontend"),
-		App:       api.String("node"),
-		CreatedAt: &api.Timestamp{Time: time.Now()},
-		Log:       api.String("1234"),
-	}
-
-	return log, nil
+		log := api.LogEntry{
+			Project:   api.String("letschat"),
+			Service:   api.String("frontend"),
+			App:       api.String("node"),
+			CreatedAt: &api.Timestamp{Time: time.Now()},
+			Log:       api.String("1234"),
+		}
+		logs <- log
+		close(logs)
+	}()
+	return logs, errors
 }
 
 // mockAppsEndpoint
@@ -247,11 +261,12 @@ func (m *mockAppsEndpoint) Scale(project, service, app string, n int) (*api.App,
 	return result, nil, nil
 }
 
-func (m *mockAppsEndpoint) GetLogs(project, service, app string, limit int) (*api.LogEntry, error) {
-	if project != "letschat" || service != "frontend" || app != "node" {
-		return nil, NewErrorResponse(http.StatusNotFound, fmt.Sprintf("App with id \"%s\" could not be found", app), "")
-	}
-	return nil, nil
+func (m *mockAppsEndpoint) GetLogs(project, service, app string, limit int) (<-chan api.LogEntry, <-chan error) {
+	errors := make(chan error)
+	err := NewErrorResponse(http.StatusNotFound, fmt.Sprintf("App with id \"%s\" could not be found", app), "")
+	errors <- err
+	close(errors)
+	return nil, errors
 }
 
 func (m *mockAppsEndpoint) Update(project, service, app string, input *api.App) (*api.App, *http.Response, error) {

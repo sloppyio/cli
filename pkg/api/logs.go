@@ -37,24 +37,48 @@ func (u *Timestamp) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func retrieveLogs(c *Client, urlStr string, limit int) (*LogEntry, error) {
-	req, err := c.NewRequest("GET", urlStr, nil)
-	if err != nil {
-		return nil, err
-	}
+func RetrieveLogs(c *Client, urlStr string, limit int) (<-chan LogEntry, <-chan error) {
+	logs := make(chan LogEntry)
+	errors := make(chan error)
 
-	// Add limit parameter
-	if limit > 0 {
-		values := req.URL.Query()
-		values.Add("lines", strconv.Itoa(limit))
-		req.URL.RawQuery = values.Encode()
-	}
+	go func() {
+		defer close(logs)
+		defer close(errors)
 
-	var log LogEntry
-	_, err = c.Do(req, log)
-	if err != nil {
-		return nil, err
-	}
+		req, err := c.NewRequest("GET", urlStr, nil)
+		if err != nil {
+			errors <- err
+			return
+		}
 
-	return &log, err
+		// Add limit parameter
+		if limit > 0 {
+			values := req.URL.Query()
+			values.Add("lines", strconv.Itoa(limit))
+			req.URL.RawQuery = values.Encode()
+		}
+
+		resp, err := c.client.Do(req)
+		if err != nil {
+			errors <- err
+			return
+		}
+		if err := checkResponse(resp); err != nil {
+			errors <- err
+			return
+		}
+
+		dec := json.NewDecoder(resp.Body)
+		for {
+			var log LogEntry
+			err := dec.Decode(&log)
+			if err != nil {
+				errors <- err
+				return
+			}
+			logs <- log
+		}
+	}()
+
+	return logs, errors
 }

@@ -6,8 +6,8 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/sloppyio/cli/ui"
 	"github.com/sloppyio/cli/command"
+	"github.com/sloppyio/cli/ui"
 )
 
 func TestLogsCommand_implements(t *testing.T) {
@@ -53,18 +53,6 @@ func TestLogsCommand_notEnoughArgs(t *testing.T) {
 	args := []string{}
 
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "minimum of 1 argument")
-}
-
-func TestLogsCommand_notFound(t *testing.T) {
-	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
-	apps := &mockAppsEndpoint{}
-	c := &command.LogsCommand{UI: mockUI, Apps: apps}
-
-	args := []string{
-		"letschat/frontend/apache",
-	}
-
-	testCodeAndOutput(t, mockUI, c.Run(args), 1, "not be found")
 }
 
 func TestLogsCommand_invalidAppPath(t *testing.T) {

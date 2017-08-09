@@ -22,8 +22,8 @@ var (
 
 // VersionCommand is a Command implementation that prints the version.
 type VersionCommand struct {
-	CheckVersion      func() (bool, string)
-	UI                ui.UI
+	CheckVersion func() (bool, string)
+	UI           ui.UI
 }
 
 // Help should return long-form help text.

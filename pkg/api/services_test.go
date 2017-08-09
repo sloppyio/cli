@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"reflect"
 	"testing"
-	"time"
 
 	"github.com/sloppyio/cli/internal/test"
 	"github.com/sloppyio/cli/pkg/api"
@@ -81,35 +80,6 @@ func TestServicesDelete(t *testing.T) {
 	}
 }
 
-func TestServicesLogs(t *testing.T) {
-	helper := test.NewHelper(t)
-	handler := func(w http.ResponseWriter, r *http.Request) { // /apps/letschat/services/frontend/logs
-		testMethod(t, r, "GET")
-		//w.WriteHeader(http.StatusOK)
-		done := make(chan struct{})
-		go func(w http.ResponseWriter) {
-			for i := 0; i < 5; i++ {
-				fmt.Fprintf(w, `{"service": "frontend-%d"}`+"\n", i)
-				if f, ok := w.(http.Flusher); ok {
-					f.Flush()
-				}
-				// Don't write everything at once.
-				time.Sleep(100 * time.Microsecond)
-			}
-			close(done)
-		}(w)
-		<-done
-	}
-	server := helper.NewAPIServer(handler)
-	defer server.Close()
-	client := helper.NewClient(server.Listener.Addr())
-	client.SetAccessToken("testToken")
-
-	client.Services.GetLogs("letschat", "frontend", 5)
-
-	//testLogOutput(t, logCh, errCh)
-}
-
 func TestServicesURLParseErrors(t *testing.T) {
 	helper := test.NewHelper(t)
 	handler := helper.NewHTTPTestHandler([]byte{}, "/")
@@ -142,7 +112,7 @@ func TestServicesURLParseErrors(t *testing.T) {
 		{
 			call: func() error {
 				_, err := client.Services.GetLogs("%", "%", 0)
-				return err
+				return <-err
 			},
 		},
 	}

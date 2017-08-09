@@ -214,8 +214,11 @@ func TestAppsLogs_notFound(t *testing.T) {
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
-	_, err := client.Apps.GetLogs("letschat", "frontend", "apache", 5)
-	testErrorResponse(t, err, nil)
+	_, errors := client.Apps.GetLogs("letschat", "frontend", "apache", 5)
+	select {
+	case err := <-errors:
+		testErrorResponse(t, err, nil)
+	}
 }
 
 func TestAppsLogs_invalidJSONBody(t *testing.T) {
@@ -226,14 +229,17 @@ func TestAppsLogs_invalidJSONBody(t *testing.T) {
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
-	log, err := client.Apps.GetLogs("letschat", "fronted", "apache", 0)
-	if err == nil {
-		t.Errorf("Expected JSON parse error: %v", err)
-	}
-	if log != nil {
+	logs, errors := client.Apps.GetLogs("letschat", "fronted", "apache", 0)
+	var err error
+	select {
+	case err = <-errors:
+		// pass
+		return
+	case log := <-logs:
 		t.Errorf("Unexpected log entry: %v", log)
+		return
 	}
-
+	t.Errorf("Expected JSON parse error. Got: %v", err)
 }
 
 func TestAppsGetMetrics(t *testing.T) {
@@ -320,7 +326,7 @@ func TestAppsURLParseErrors(t *testing.T) {
 		{
 			call: func() error {
 				_, err := client.Apps.GetLogs("%", "%", "%", 0)
-				return err
+				return <-err
 			},
 		},
 		{
@@ -334,134 +340,4 @@ func TestAppsURLParseErrors(t *testing.T) {
 	for _, tt := range urlTests {
 		testURLParseError(t, tt.call())
 	}
-}
-
-//func TestAppsServerErrors(t *testing.T) {
-//	helper := test.NewHelper(t)
-//	handler := helper.NewHTTPTestHandler([]byte{}, "/")
-//	server := helper.NewAPIServer(handler)
-//	defer server.Close()
-//	client := helper.NewClient(server.Listener.Addr())
-//	client.SetAccessToken("testToken")
-//
-//	var serverErrorTests = []struct {
-//		uri    string
-//		method string
-//		err    *api.ErrorResponse
-//		call   func() (*http.Response, error)
-//	}{
-//		{
-//			uri:    "/apps/letschat/services/frontend",
-//			method: "GET",
-//			err:    newErrorResponse(nil, "something happend", ""),
-//			call: func() (*http.Response, error) {
-//				_, resp, err := client.Apps.List("letschat", "frontend")
-//				return resp, err
-//			},
-//		},
-//		{
-//			uri:    "/apps/letschat/services/frontend/apps/apache",
-//			method: "GET",
-//			err:    newErrorResponse(nil, "something happend", ""),
-//			call: func() (*http.Response, error) {
-//				_, resp, err := client.Apps.Get("letschat", "frontend", "apache")
-//				return resp, err
-//			},
-//		},
-//		{
-//			uri:    "/apps/letschat/services/frontend/apps/apache",
-//			method: "PATCH",
-//			err:    newErrorResponse(nil, "something happend", ""),
-//			call: func() (*http.Response, error) {
-//				_, resp, err := client.Apps.Update("letschat", "frontend", "apache", nil)
-//				return resp, err
-//			},
-//		},
-//		{
-//			uri:    "/apps/letschat/services/frontend/apps/apache",
-//			method: "DELETE",
-//			err:    newErrorResponse(nil, "something happend", ""),
-//			call: func() (*http.Response, error) {
-//				_, resp, err := client.Apps.Delete("letschat", "frontend", "apache", true)
-//				return resp, err
-//			},
-//		},
-//		{
-//			uri:    "/apps/letschat/services/frontend/apps/apache/restart",
-//			method: "POST",
-//			err:    newErrorResponse(nil, "something happend", ""),
-//			call: func() (*http.Response, error) {
-//				_, resp, err := client.Apps.Restart("letschat", "frontend", "apache")
-//				return resp, err
-//			},
-//		},
-//		{
-//			uri:    "/apps/letschat/services/frontend/apps/apache",
-//			method: "PATCH",
-//			err:    newErrorResponse(nil, "something happend", ""),
-//			call: func() (*http.Response, error) {
-//				_, resp, err := client.Apps.Scale("letschat", "frontend", "apache", 1)
-//				return resp, err
-//			},
-//		},
-//		{
-//			uri:    "/apps/letschat/services/frontend/apps/apache/stats",
-//			method: "GET",
-//			err:    newErrorResponse(nil, "something happend", ""),
-//			call: func() (*http.Response, error) {
-//				_, resp, err := client.Apps.GetMetrics("letschat", "frontend", "apache")
-//				return resp, err
-//			},
-//		},
-//	}
-//
-//	for _, tt := range serverErrorTests {
-//		func(uri, method string, call func() (*http.Response, error), errR *api.ErrorResponse) {
-//			setup()
-//			defer teardown()
-//
-//			mux.HandleFunc(uri, func(w http.ResponseWriter, r *http.Request) {
-//				testMethod(t, r, method)
-//				w.WriteHeader(http.StatusBadRequest)
-//				fmt.Fprint(w, `{"status": "error", "message": "something happend"}`)
-//			})
-//
-//			resp, err := call()
-//			errR.Response = resp
-//			testErrorResponse(t, err, errR)
-//		}(tt.uri, tt.method, tt.call, tt.err)
-//	}
-//}
-
-var testAppInput = []struct {
-	input *api.App
-	want  string
-}{
-	{
-		nil,
-		"missing the required app",
-	},
-	{
-		&api.App{},
-		"missing the required app.ID",
-	},
-	{
-		&api.App{
-			ID: api.String("frontend"),
-		},
-		"missing the required app.Image",
-	},
-}
-
-func TestValidateApp(t *testing.T) {
-	t.Skipf("TODO - needs to test indirectly")
-	//for _, k := range testAppInput {
-	//	err := api.validateApp(k.input)
-	//	if err == nil {
-	//		t.Errorf("Expected error to be returned")
-	//	}
-	//	if err.Error() != k.want {
-	//		t.Errorf("Unexpected error to be returned: %v, want %v", err, k.want)
-	//	}
-	//}
 }

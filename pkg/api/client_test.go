@@ -1,7 +1,6 @@
 package api_test
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -88,6 +87,7 @@ func TestDo(t *testing.T) {
 	helper := test.NewHelper(t)
 	handler := helper.NewHTTPTestHandler([]byte(`{"status":"success", "data":{"Bar":"Baz"}}`), "/")
 	server := helper.NewAPIServer(handler)
+	defer server.Close()
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
@@ -108,46 +108,6 @@ func TestDo(t *testing.T) {
 	}
 }
 
-func TestDo_withWriter(t *testing.T) {
-	helper := test.NewHelper(t)
-	handler := helper.NewHTTPTestHandler([]byte(`abc`), "/")
-	server := helper.NewAPIServer(handler)
-	client := helper.NewClient(server.Listener.Addr())
-	client.SetAccessToken("testToken")
-
-	req, err := client.NewRequest("GET", "/", nil)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	var buf bytes.Buffer
-	client.Do(req, &buf)
-
-	body, err := ioutil.ReadAll(&buf)
-	if err != nil {
-		t.Fatalf("Expected no error: %v", err)
-	}
-
-	if want := `abc`; want != string(body) {
-		t.Errorf("Response body = %q, want %q", body, want)
-	}
-}
-
-func TestDo_withErrorReadWriter(t *testing.T) {
-	helper := test.NewHelper(t)
-	handler := helper.NewHTTPTestHandler([]byte(`{}`), "/")
-	server := helper.NewAPIServer(handler)
-	client := helper.NewClient(server.Listener.Addr())
-	client.SetAccessToken("testToken")
-
-	req, err := client.NewRequest("GET", "/", nil)
-	if err != nil {
-		t.Fatalf("Unexpected error: %v", err)
-	}
-	if _, err := client.Do(req, &errorReadWriter{}); err == nil {
-		t.Error("Expected error to be returned")
-	}
-}
-
 func TestDo_errorResponse(t *testing.T) {
 	helper := test.NewHelper(t)
 	handler := func(w http.ResponseWriter, r *http.Request) {
@@ -156,6 +116,7 @@ func TestDo_errorResponse(t *testing.T) {
 		fmt.Fprint(w, `{"status":"error", "message":"not found","reason":"some reason"}`)
 	}
 	server := helper.NewAPIServer(handler)
+	defer server.Close()
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
@@ -175,6 +136,7 @@ func TestDo_invalidToken(t *testing.T) {
 		fmt.Fprint(w, `{"status":"error","message":"No valid token found.", "reason": "Check https://admin.sloppy.io/account/profile for your token."}`)
 	}
 	server := helper.NewAPIServer(handler)
+	defer server.Close()
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
@@ -191,6 +153,7 @@ func TestDo_invalidJSONBody(t *testing.T) {
 	helper := test.NewHelper(t)
 	handler := helper.NewHTTPTestHandler([]byte(`{b}`), "/")
 	server := helper.NewAPIServer(handler)
+	defer server.Close()
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
@@ -212,6 +175,7 @@ func TestDo_noRequest(t *testing.T) {
 	helper := test.NewHelper(t)
 	handler := helper.NewHTTPTestHandler([]byte(`{}`), "/")
 	server := helper.NewAPIServer(handler)
+	defer server.Close()
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 

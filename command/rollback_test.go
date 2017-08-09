@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/mitchellh/cli"
-	"github.com/sloppyio/cli/ui"
 	"github.com/sloppyio/cli/command"
+	"github.com/sloppyio/cli/ui"
 )
 
 func TestRollbackCommand_implements(t *testing.T) {

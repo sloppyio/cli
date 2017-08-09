@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -56,11 +57,12 @@ func (h *Helper) NewHTTPTestHandler(content []byte, path string) http.HandlerFun
 	c := content
 	return func(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(r.URL.Path, path) {
-			_, err := w.Write(c)
+			n, err := w.Write(c)
 			if err != nil {
 				h.t.Error(err)
 				return
 			}
+			w.Header().Set("Content-Length", strconv.Itoa(n))
 		} else {
 			http.NotFound(w, r)
 		}
