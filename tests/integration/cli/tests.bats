@@ -160,6 +160,7 @@ url_after_change="sloppy-cli-after-testing.sloppy.zone"
 }
 
 @test "sloppy stats" {
+  skip
   run sloppy stats apache
   echo $output
   echo $status
@@ -197,6 +198,7 @@ url_after_change="sloppy-cli-after-testing.sloppy.zone"
 }
 
 @test "sloppy get url after change" {
+  run sleep 15
   result=$(http --headers GET $url_after_change | head -n 1 | tr -d '[:space:]')
   echo $result
   [ ${result} == "HTTP/1.1200OK" ]
