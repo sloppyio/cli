@@ -33,6 +33,9 @@ export PATH="${BUILD_TARGET}:$PATH"
   exit 1
 }
 
+# Ensure a clean stage
+sloppy delete -f apache || true
+
 bats ${__tests}/integration/cli/tests.bats
 bats ${__tests}/integration/cli/volume.bats
 

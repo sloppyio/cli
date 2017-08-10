@@ -8,8 +8,7 @@ DOCKER_IMAGE := sloppy/go-cross:latest
 
 # env vars passed through directly to Docker's build scripts
 DOCKER_ENVS := \
-	-e GIT_COMMIT=$(GIT_COMMIT) \
-	-e SLOPPY_APITOKEN=$(SLOPPY_APITOKEN)
+	-e GIT_COMMIT=$(GIT_COMMIT)
 
 
 DOCKER_MOUNT := -v "$(CURDIR):/go/src/github.com/sloppyio/cli" \
