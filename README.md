@@ -6,7 +6,7 @@ sloppy is a command line tool for sloppy.io, a container as a service provider.
 
 ## Installation
 
-To install the official version of the `sloppy` CLI, please visit [Install CLI](https://sloppy.io/knowledge-base/install-cli/).
+To install the official version of the `sloppy` CLI, please visit [Install CLI](http://kb.sloppy.io/getting-started/getting-started-with-the-cli-launch-your-first-dockerized-app/step-1-install-the-cli).
 
 ## Building
 
