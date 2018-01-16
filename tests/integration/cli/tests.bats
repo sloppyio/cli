@@ -105,14 +105,14 @@ url_after_change="sloppy-cli-after-testing.sloppy.zone"
 }
 
 @test "sloppy start testproject" {
-  run sloppy start tests/files/testproject.json
+  run sloppy start command/testdata/testproject.json
   echo $output
   [ "$status" -eq 0 ]
   [[ "${lines[3]}" =~  "frontend" ]]
 }
 
 @test "sloppy start different project with same domain" {
-  run sloppy start tests/files/testproject_duplicate_domain.json
+  run sloppy start command/testdata/testproject_duplicate_domain.json
   echo $output
   [ "$status" -eq 1 ]
   [[ "${lines[0]}" =~  "error: Could not validate input *.domain \"${url_before_change}\" is already used" ]]
@@ -160,6 +160,7 @@ url_after_change="sloppy-cli-after-testing.sloppy.zone"
 }
 
 @test "sloppy stats" {
+  skip
   run sloppy stats apache
   echo $output
   echo $status
@@ -197,6 +198,7 @@ url_after_change="sloppy-cli-after-testing.sloppy.zone"
 }
 
 @test "sloppy get url after change" {
+  run sleep 15
   result=$(http --headers GET $url_after_change | head -n 1 | tr -d '[:space:]')
   echo $result
   [ ${result} == "HTTP/1.1200OK" ]
@@ -243,7 +245,7 @@ url_after_change="sloppy-cli-after-testing.sloppy.zone"
 env_test_helper() {
   local -r env="$1"
   local -r filename=$(mktemp /tmp/XXXXXXXXXXXX.json)
-  cat tests/files/testproject.json | jq ".services[0].apps[0].env.${env}=\"forbidden\"" > $filename
+  cat command/testdata/testproject.json | jq ".services[0].apps[0].env.${env}=\"forbidden\"" > $filename
   run sloppy start $filename
   echo $output
   [ "$status" -eq 1 ]

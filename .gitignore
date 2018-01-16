@@ -14,3 +14,10 @@ Thumbs.db
 *.zip
 /temp/*
 /bundles
+
+# Go test output
+/*.cover
+/coverage.txt
+
+# Go generate output
+*.syso
