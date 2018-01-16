@@ -18,7 +18,7 @@ if [ $? == 0 ]; then
 fi
 
 # skip integration tests on Travis
-if [ $CI == true ]; then
+if [ $CI == "true" ]; then
   exit 0
 fi
 
