@@ -17,6 +17,11 @@ if [ $? == 0 ]; then
   echo "==> Successfully"
 fi
 
+# skip integration tests on Travis
+if [ $CI == true ]; then
+  exit 0
+fi
+
 echo "Start integration tests"
 
 set -- $1 "test"
@@ -29,7 +34,7 @@ export PATH="${BUILD_TARGET}:$PATH"
 {
   bats --version > /dev/null
 } || {
-  echo "Integration tests are not supported by your OS."
+  echo "Integration tests are not supported by your OS. (or bats is not installed)"
   exit 1
 }
 
