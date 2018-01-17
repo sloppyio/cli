@@ -1,61 +1,12 @@
 # sloppy.io CLI
 
-sloppy is a command line tool for sloppy.io, a container as a service provider.
+[![GoDoc](https://godoc.org/github.com/sloppyio/cli?status.svg)](https://godoc.org/github.com/sloppyio/cli) [![Build Status](https://travis-ci.org/sloppyio/cli.svg?branch=master)](https://travis-ci.org/sloppyio/cli) [![Coverage Status](https://coveralls.io/repos/github/sloppyio/cli/badge.svg?branch=master)](https://coveralls.io/github/sloppyio/cli?branch=master)
 
-[![GoDoc](https://godoc.org/github.com/sloppyio/cli/src?status.svg)](https://godoc.org/github.com/sloppyio/cli/src/)  
+sloppy is a command line tool for [sloppy.io](https://sloppy.io), a container as a service provider.  
 
 ## Installation
 
 To install the official version of the `sloppy` CLI, please visit [Install CLI](http://kb.sloppy.io/getting-started/getting-started-with-the-cli-launch-your-first-dockerized-app/step-1-install-the-cli).
-
-## Building
-
-To build locally you need to have go 1.6 or later. If not, please upgrade.
-
-```sh
-make local
-```
-
-You can also build different pre-releases of the sloppy CLI.
-```sh
-scripts/make.sh build beta      # For single builds
-scripts/make.sh build release   # w/o pre-release
-scripts/make.sh cross rc.[0-9]  # For cross compiling
-```
-
-To build within a docker container:
-```sh
-make beta
-```
-The binaries created are stored in `./bundles/${VERSION}-${PRERELEASE}/`.
-
-## Contributing
-
-A great way to start contributing is to send a detailed report when you encounter an issue.
-
-When reporting issues, always include:
-* the output of `sloppy version`
-* the output of `sloppy --debug [COMMAND]`
-
-Also include the steps necessary to reproduce the issue if possible. This will help us review and fix your issue quickly.
-Please consider removing sensitive data from your output before posting it.
-
-When actually working on issues, please:
-
-1. Fork this project
-
-2. Setup a new branch to work in
-
-3. Always run `make fmt` on your code before committing it
-
-4. Even if it's a minor change, you should always write tests
-
-5. Run `make test` or `scripts/make.sh test`
-
-6. Try to write good commit messages for each change. Use the [angularjs commit message guide](https://gist.github.com/stephenparish/9941e89d80e2bc58a153)
-
-7. Push the commits to your fork and submit a pull request
-
 
 ## License
 This CLI is distributed under the terms of the ISC license found in the [LICENSE](./LICENSE)

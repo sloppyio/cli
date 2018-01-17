@@ -4,19 +4,19 @@
 # bats test for the volume
 
 @test "sloppy start app with invalid volume size" {
-  run sloppy start tests/files/invalid_testproject_with_volume.json
+  run sloppy start command/testdata/invalid_testproject_with_volume.json
   echo $output
   [[ "$output" =~  "error: Invalid volume size for /usr/share/docs Volume size needs to be a multiple of 8GB, was 7GB" ]]
 }
 
 @test "sloppy start app with a volume size > as the bought addon" {
-  run sloppy start tests/files/testproject_with_too_big_volume.json
+  run sloppy start command/testdata/testproject_with_too_big_volume.json
   echo $output
   [[ "${lines[0]}" =~  "error: Could not validate input Overrun maximum storage." ]]
 }
 
 @test "sloppy start app with valid volume" {
-  run sloppy start tests/files/testproject_with_volume.json
+  run sloppy start command/testdata/testproject_with_volume.json
   echo $output
 }
 

@@ -8,7 +8,8 @@ DOCKER_IMAGE := sloppy/go-cross:latest
 
 # env vars passed through directly to Docker's build scripts
 DOCKER_ENVS := \
-	-e GIT_COMMIT=$(GIT_COMMIT)
+	-e GIT_COMMIT=$(GIT_COMMIT)\
+	-e CI=$(CI)
 
 
 DOCKER_MOUNT := -v "$(CURDIR):/go/src/github.com/sloppyio/cli" \
@@ -28,8 +29,7 @@ DOCKER_RUN_DOCKER := $(DOCKER_FLAGS) "$(DOCKER_IMAGE)"
 
 default: cross
 
-local: _deps
-	scripts/make.sh build
+local: scripts/make.sh build
 
 cross: bundle
 	$(DOCKER_RUN_DOCKER) scripts/make.sh cross release
@@ -58,8 +58,11 @@ shell:
 bundle:
 	mkdir -p bundles
 
+coverage-show:
+	go tool cover -html=coverage.txt
+
+coverage-report:
+	goveralls -coverprofile=coverage.txt -service=travis-ci
+
 clean:
 	rm -rf bundles
-
-_deps:
-	scripts/make.sh deps
