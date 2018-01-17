@@ -115,7 +115,7 @@ func (m *mockProjectsEndpoint) Delete(project string, force bool) (*api.StatusRe
 	return result, nil, nil
 }
 
-func (m *mockProjectsEndpoint) GetLogs(project string, limit int) (<-chan api.LogEntry, <-chan error) {
+func (m *mockProjectsEndpoint) GetLogs(project string, limit int, fromDate string, toDate string) (<-chan api.LogEntry, <-chan error) {
 	logs := make(chan api.LogEntry)
 	errors := make(chan error)
 
@@ -178,7 +178,7 @@ func (m *mockServicesEndpoint) Delete(project, service string, force bool) (*api
 	return result, nil, nil
 }
 
-func (m *mockServicesEndpoint) GetLogs(project, service string, limit int) (<-chan api.LogEntry, <-chan error) {
+func (m *mockServicesEndpoint) GetLogs(project, service string, limit int, fromDate string, toDate string) (<-chan api.LogEntry, <-chan error) {
 	logs := make(chan api.LogEntry)
 	errors := make(chan error)
 
@@ -261,7 +261,7 @@ func (m *mockAppsEndpoint) Scale(project, service, app string, n int) (*api.App,
 	return result, nil, nil
 }
 
-func (m *mockAppsEndpoint) GetLogs(project, service, app string, limit int) (<-chan api.LogEntry, <-chan error) {
+func (m *mockAppsEndpoint) GetLogs(project, service, app string, limit int, fromDate string, toDate string) (<-chan api.LogEntry, <-chan error) {
 	errors := make(chan error)
 	err := NewErrorResponse(http.StatusNotFound, fmt.Sprintf("App with id \"%s\" could not be found", app), "")
 	errors <- err

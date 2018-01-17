@@ -111,7 +111,7 @@ func TestServicesURLParseErrors(t *testing.T) {
 		},
 		{
 			call: func() error {
-				_, err := client.Services.GetLogs("%", "%", 0)
+				_, err := client.Services.GetLogs("%", "%", 0, "%", "%")
 				return <-err
 			},
 		},

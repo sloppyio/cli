@@ -234,7 +234,7 @@ func TestProjectsLogs_notFound(t *testing.T) {
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
-	logs, errors := client.Projects.GetLogs("letschat", 5)
+	logs, errors := client.Projects.GetLogs("letschat", 5, "", "")
 	select {
 	case err := <-errors:
 		testErrorResponse(t, err, nil)
@@ -252,7 +252,7 @@ func TestProjectsLogs_invalidJSONBody(t *testing.T) {
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("test")
 
-	logs, errors := client.Projects.GetLogs("letschat", 0)
+	logs, errors := client.Projects.GetLogs("letschat", 0, "", "")
 	select {
 	case err := <-errors:
 		if !strings.HasPrefix(err.Error(), "invalid character") {
@@ -311,7 +311,7 @@ func TestProjectURLParseErrors(t *testing.T) {
 		},
 		{
 			call: func() error {
-				_, err := client.Projects.GetLogs("%", 0)
+				_, err := client.Projects.GetLogs("%", 0, "%", "%")
 				return <-err
 			},
 		},

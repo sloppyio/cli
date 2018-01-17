@@ -27,11 +27,15 @@ Usage: sloppy logs [OPTIONS] PROJECT[/SERVICE[/APP]]
 
 Options:
 
-  -n                  Number of lines to show from the end of the logs
+	-n                  Number of lines to show from the end of the logs
+	--from              Filters the result by start date. Date format is YYYY-MM-DD
+	--to                Filters the result by end date. Date format is YYYY-MM-DD
+
 
 Examples:
 
-  sloppy logs -n 10 letschat
+	sloppy logs -n 10 letschat
+	sloppy logs --from 2018-01-13 --to 2018-01-15 letschat
   sloppy logs letschat/frontend/apache
 `
 	return strings.TrimSpace(helpText)
@@ -41,8 +45,13 @@ Examples:
 // command-line args.
 func (c *LogsCommand) Run(args []string) int {
 	var lines int
+	var fromDate string
+	var toDate string
+
 	cmdFlags := newFlagSet("logs", flag.ContinueOnError)
 	cmdFlags.IntVar(&lines, "n", 0, "")
+	cmdFlags.StringVar(&fromDate, "from", "", "")
+	cmdFlags.StringVar(&toDate, "to", "", "")
 
 	if err := cmdFlags.Parse(args); err != nil {
 		c.UI.Error(err.Error())
@@ -65,11 +74,11 @@ func (c *LogsCommand) Run(args []string) int {
 
 	switch len(parts) {
 	case 1:
-		logs, errors = c.Projects.GetLogs(parts[0], lines)
+		logs, errors = c.Projects.GetLogs(parts[0], lines, fromDate, toDate)
 	case 2:
-		logs, errors = c.Services.GetLogs(parts[0], parts[1], lines)
+		logs, errors = c.Services.GetLogs(parts[0], parts[1], lines, fromDate, toDate)
 	case 3:
-		logs, errors = c.Apps.GetLogs(parts[0], parts[1], parts[2], lines)
+		logs, errors = c.Apps.GetLogs(parts[0], parts[1], parts[2], lines, fromDate, toDate)
 	default:
 		return c.UI.ErrorInvalidAppPath(cmdFlags.Arg(0))
 	}
@@ -77,7 +86,9 @@ func (c *LogsCommand) Run(args []string) int {
 	for {
 		select {
 		case err := <-errors:
-			c.UI.ErrorAPI(err)
+			if err != nil {
+				c.UI.ErrorAPI(err)
+			}
 			return 1
 		case entry, ok := <-logs:
 			if !ok {

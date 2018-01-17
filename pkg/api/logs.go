@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"strconv"
 	"time"
 )
@@ -37,7 +38,7 @@ func (u *Timestamp) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func RetrieveLogs(c *Client, urlStr string, limit int) (<-chan LogEntry, <-chan error) {
+func RetrieveLogs(c *Client, urlStr string, limit int, fromDate string, toDate string) (<-chan LogEntry, <-chan error) {
 	logs := make(chan LogEntry)
 	errors := make(chan error)
 
@@ -57,7 +58,16 @@ func RetrieveLogs(c *Client, urlStr string, limit int) (<-chan LogEntry, <-chan 
 			values.Add("lines", strconv.Itoa(limit))
 			req.URL.RawQuery = values.Encode()
 		}
-
+		if fromDate != "" {
+			values := req.URL.Query()
+			values.Add("from", fromDate)
+			req.URL.RawQuery = values.Encode()
+		}
+		if toDate != "" {
+			values := req.URL.Query()
+			values.Add("to", toDate)
+			req.URL.RawQuery = values.Encode()
+		}
 		resp, err := c.client.Do(req)
 		if err != nil {
 			errors <- err
@@ -73,6 +83,9 @@ func RetrieveLogs(c *Client, urlStr string, limit int) (<-chan LogEntry, <-chan 
 			var log LogEntry
 			err := dec.Decode(&log)
 			if err != nil {
+				if err == io.EOF {
+					break
+				}
 				errors <- err
 				return
 			}
