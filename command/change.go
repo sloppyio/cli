@@ -27,9 +27,10 @@ type ChangeCommand struct {
 // Help should return long-form help text.
 func (c *ChangeCommand) Help() string {
 	helpText := `
-Usage: sloppy change [OPTIONS] (PROJECT/SERVICE/APP | [PROJECT] FILENAME)
+Usage: sloppy change [OPTIONS] (FILENAME | PROJECT/SERVICE/APP)
 
-  Sets the new values for the given app.
+  Update an entire project or an individual app.
+  If the project doesn't exist yet, it's created.
 
 Options:
 
@@ -43,8 +44,10 @@ Options:
 
 Examples:
 
-  sloppy change -m 128 letschat/frontend/apache
+  sloppy change sloppy.json
   sloppy change -var=domain:abc.sloppy.zone letschat.json
+  sloppy change -m 128 letschat/frontend/apache
+  sloppy change --instances 2 letschat/frontend/apache
 `
 	return strings.TrimSpace(helpText)
 }
@@ -243,5 +246,5 @@ func (c *ChangeCommand) updateProject(args []string) int {
 
 // Synopsis should return a one-line, short synopsis of the command.
 func (c *ChangeCommand) Synopsis() string {
-	return "Change the configuration of an application on the fly"
+	return "Change a project or app on the fly"
 }
