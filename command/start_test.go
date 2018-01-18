@@ -18,7 +18,7 @@ func TestStartCommand_implements(t *testing.T) {
 		t.Errorf("Help = %s", c.Help())
 	}
 
-	if !strings.Contains(c.Synopsis(), "Start") {
+	if !strings.Contains(c.Synopsis(), "Create") {
 		t.Errorf("Synopsis = %s", c.Synopsis())
 	}
 }

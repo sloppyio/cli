@@ -23,13 +23,14 @@ func (c *StartCommand) Help() string {
 	helpText := `
 Usage: sloppy start [OPTIONS] FILENAME
 
-  Start a new project on the sloppy service
+  Create a new project. Can also use 'sloppy change' for this.
 
 Options:
   -v, --var=[]     values to set for placeholders
 
 Examples:
 
+  sloppy start sloppy.json
   sloppy start --var=domain:mydomain.sloppy.zone --var=memory:128 myproject.json
 `
 	return strings.TrimSpace(helpText)
@@ -103,5 +104,5 @@ func (c *StartCommand) Run(args []string) int {
 
 // Synopsis should return a one-line, short synopsis of the command.
 func (c *StartCommand) Synopsis() string {
-	return "Start a new project on the sloppy service"
+	return "Create a new project"
 }
