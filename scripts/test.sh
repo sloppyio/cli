@@ -7,7 +7,7 @@ echo "Start unit tests"
 # Ensures not to test the vendor directory too
 packages=$(go list ./... | grep -h -v "/vendor/")
 for pkg in ${packages}; do
-    go test -v -race -timeout 30s -covermode=count -coverprofile=$(basename ${pkg}).cover ${pkg}
+    go test -race -timeout 30s -covermode=count -coverprofile=$(basename ${pkg}).cover ${pkg}
 done
 # Generate cover profile
 echo "mode: count" > ./coverage.txt
