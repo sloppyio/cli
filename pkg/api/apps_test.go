@@ -214,7 +214,7 @@ func TestAppsLogs_notFound(t *testing.T) {
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
-	_, errors := client.Apps.GetLogs("letschat", "frontend", "apache", 5)
+	_, errors := client.Apps.GetLogs("letschat", "frontend", "apache", 5, "", "")
 	select {
 	case err := <-errors:
 		testErrorResponse(t, err, nil)
@@ -229,7 +229,7 @@ func TestAppsLogs_invalidJSONBody(t *testing.T) {
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
-	logs, errors := client.Apps.GetLogs("letschat", "fronted", "apache", 0)
+	logs, errors := client.Apps.GetLogs("letschat", "fronted", "apache", 0, "%", "%")
 	var err error
 	select {
 	case err = <-errors:
@@ -325,7 +325,7 @@ func TestAppsURLParseErrors(t *testing.T) {
 		},
 		{
 			call: func() error {
-				_, err := client.Apps.GetLogs("%", "%", "%", 0)
+				_, err := client.Apps.GetLogs("%", "%", "%", 0, "%", "%")
 				return <-err
 			},
 		},

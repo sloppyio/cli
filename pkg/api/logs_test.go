@@ -63,12 +63,12 @@ func TestRetrieveLogs(t *testing.T) {
 	client := helper.NewClient(server.Listener.Addr())
 	client.SetAccessToken("testToken")
 
-	logs, errors := api.RetrieveLogs(client, "/", 0)
+	logs, errors := api.RetrieveLogs(client, "/", 0, "", "")
 	entries := make([]api.LogEntry, 0)
 	for {
 		select {
 		case err := <-errors:
-			if err != io.EOF {
+			if err != nil && err != io.EOF {
 				t.Error(err)
 			}
 			return
