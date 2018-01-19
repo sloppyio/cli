@@ -3,7 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -15,7 +15,7 @@ const defaultBaseURL = "https://api.sloppy.io/v1/"
 const defaultTimeOut = 2 * time.Minute
 
 var (
-	ErrMissingAccessToken = fmt.Errorf("missing access token")
+	ErrMissingAccessToken = errors.New(`Missing "SLOPPY_APITOKEN", please login by exporting your token https://admin.sloppy.io/account/tokens`)
 )
 
 // A Client handles communication with the sloppy.io API.

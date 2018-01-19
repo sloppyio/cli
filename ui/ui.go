@@ -68,7 +68,7 @@ func NewUI() UI {
 func (ui *DefaultUI) ErrorAPI(err error) {
 	errStr := err.Error()
 	if err == api.ErrMissingAccessToken {
-		ui.Error("not logged in")
+		ui.Error(errStr)
 		return
 	}
 
