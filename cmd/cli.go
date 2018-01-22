@@ -34,16 +34,8 @@ func main() {
 		}
 	}()
 
-	// Shortcut --version, -v to show version command.
 	args := os.Args[1:]
 	for i, arg := range args {
-		if arg == "--version" {
-			newArgs := make([]string, len(args)+1)
-			newArgs[0] = "version"
-			copy(newArgs[1:], args)
-			args = newArgs
-			break
-		}
 		if arg == "--help" {
 			args = append([]string{"--help"}, args...)
 		}
@@ -56,7 +48,8 @@ func main() {
 	// Update mechanism
 	update := make(chan struct{}, 1)
 	if len(args) > 0 && args[0] == "version" {
-		update <- struct{}{}
+		fmt.Println(command.Version)
+		os.Exit(0)
 	} else {
 		go func() {
 			if ok, output := checkVersion(); ok {

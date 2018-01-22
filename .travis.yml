@@ -8,7 +8,7 @@ sudo: required
 services:
 - docker
 go:
-- 1.8.3
+- 1.9.3
 - tip
 install:
 - go get golang.org/x/tools/cmd/cover github.com/mattn/goveralls

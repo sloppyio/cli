@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -30,17 +29,14 @@ func checkVersion() (bool, string) {
 	}
 
 	if compareVersion(deployedVersion, command.Version) == 1 {
-		var buf []byte
-		w := bytes.NewBuffer(buf)
-		fmt.Fprintln(w, "A newer version of this runtime is available")
-		fmt.Fprintf(w, "Server has version %s\n", deployedVersion)
-		fmt.Fprintf(w, "User has version %s\n", command.Version)
-		fmt.Fprint(w, "Check https://sloppy.io/knowledge-base/install-cli/ for install/update instructions and ")
-		fmt.Fprintln(w, "https://github.com/sloppyio/cli/blob/master/CHANGELOG.md for the changelog")
-
 		// Truncate file to force update request
 		updateFile(false)
-		return true, w.String()
+		return true, fmt.Sprintf(`A newer version of this runtime is available
+Server has version: %s
+User has version: %s
+
+Check https://sloppy.io/knowledge-base/install-cli/ for install/update instructions
+and https://github.com/sloppyio/cli/blob/master/CHANGELOG.md for the changelog`, deployedVersion, command.Version)
 	}
 
 	return false, ""
