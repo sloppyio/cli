@@ -26,7 +26,7 @@ func main() {
 	stackTrace := false // stackTrace holds the state whether a stack trace is displayed
 	defer func() {
 		if err := recover(); err != nil {
-			printError("Error executing CLI: %s", err)
+			printError("%s\nFor help, please visit https://kb.sloppy.io/features#cli-command-reference", err)
 			if stackTrace {
 				debug.PrintStack()
 			}
@@ -65,7 +65,7 @@ func main() {
 	if token, ok := os.LookupEnv(envToken); ok {
 		client.SetAccessToken(token)
 	} else {
-		fatal("Missing access token")
+		fatal("Missing %q, please login by exporting your token https://admin.sloppy.io/account/tokens", envToken)
 	}
 
 	if apiURL, ok := os.LookupEnv(envApiURL); ok {
@@ -83,7 +83,7 @@ func main() {
 
 	exitCode, err := cli.Run()
 	if err != nil {
-		fatal("error executing CLI: %s\n", err.Error())
+		fatal("%s\nFor help, please visit https://kb.sloppy.io/features#cli-command-reference", err.Error())
 	}
 
 	<-update // wait for update goroutine

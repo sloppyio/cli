@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.9.0 (2018-01-19)
++ feat(log-filter): the logs can be filtered by date range
+
 ## 1.8.0 (2017-06-07)
 + feat(logging): configure external logging service
 
