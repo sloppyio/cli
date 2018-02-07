@@ -64,8 +64,8 @@ func main() {
 
 	if token, ok := os.LookupEnv(envToken); ok {
 		client.SetAccessToken(token)
-	} else {
-		fatal("Missing %q, please login by exporting your token https://admin.sloppy.io/account/tokens", envToken)
+	} else if len(args) != 0 && args[0] != "--help" {
+		fatal("Missing %s, please login by exporting your token https://admin.sloppy.io/account/tokens", envToken)
 	}
 
 	if apiURL, ok := os.LookupEnv(envApiURL); ok {
@@ -91,7 +91,7 @@ func main() {
 }
 
 func fatal(msg string, args ...interface{}) {
-	printError(msg, args)
+	printError(msg, args...)
 	os.Exit(1)
 }
 
