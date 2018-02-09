@@ -35,7 +35,7 @@ func TestDockerLoginCommand(t *testing.T) {
 	c := &command.DockerLoginCommand{UI: mockUI, RegistryCredentials: registryCredentials}
 
 	// Create dummy file
-	file := createTempFile(t, "docker", "success")
+	file := createTempFile(t, "docker", "aWxvcmVtOmlwc3Vt")
 	defer os.Remove(file.Name())
 
 	args := []string{file.Name()}
@@ -55,7 +55,7 @@ func TestDockerLoginCommand_failed(t *testing.T) {
 	c := &command.DockerLoginCommand{UI: mockUI, RegistryCredentials: registryCredentials}
 
 	// Create dummy file
-	file := createTempFile(t, "docker", "failed")
+	file := createTempFile(t, "docker", "")
 	defer os.Remove(file.Name())
 
 	args := []string{file.Name()}
@@ -74,7 +74,7 @@ func TestDockerLoginCommand_abort(t *testing.T) {
 	c := &command.DockerLoginCommand{UI: mockUI}
 
 	// Create dummy file
-	file := createTempFile(t, "docker", "abort")
+	file := createTempFile(t, "docker", "")
 	defer os.Remove(file.Name())
 
 	args := []string{file.Name()}
@@ -93,14 +93,18 @@ func TestDockerLoginCommand_noDockerConfig(t *testing.T) {
 }
 
 // createTempFile creates a dummy file for testing purpose
-func createTempFile(t *testing.T, name, content string) *os.File {
+func createTempFile(t *testing.T, name, auth string) *os.File {
 	file, err := ioutil.TempFile(os.TempDir(), name)
 	if err != nil {
 		t.Fatal("Couldn't create temp file!")
 	}
 	defer file.Close()
 
-	file.Write([]byte(`{"auth":"` + content + `"}`))
+	if len(auth) > 0 {
+		file.Write([]byte(`{"auths":{"https://index.docker.io/v1/":{"auth":"` + auth + `"}}}`))
+	} else {
+		file.Write([]byte(`{"auths":{}}}`))
+	}
 	file.Sync()
 
 	return file

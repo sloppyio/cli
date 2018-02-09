@@ -23,8 +23,10 @@ func Transform(reader io.Reader) (io.Reader, error) {
 
 	for server, cred := range all {
 		ac := c.AuthConfigs[server]
-		ac.Auth = encodeAuth(cred.Username, cred.Password)
-		c.AuthConfigs[server] = ac
+		if len(ac.Auth) == 0 {
+			ac.Auth = encodeAuth(cred.Username, cred.Password)
+			c.AuthConfigs[server] = ac
+		}
 	}
 
 	b, err := json.Marshal(c)
