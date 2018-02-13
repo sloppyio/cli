@@ -29,6 +29,13 @@ func Transform(reader io.Reader) (io.Reader, error) {
 		}
 	}
 
+	// cleanup empty configs
+	for server, ac := range c.AuthConfigs {
+		if len(ac.Auth) == 0 {
+			delete(c.AuthConfigs, server)
+		}
+	}
+
 	b, err := json.Marshal(c)
 	if err != nil {
 		return nil, err
