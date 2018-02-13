@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/sloppyio/cli/pkg/api"
+	"github.com/sloppyio/cli/pkg/dockerconfig"
 	"github.com/sloppyio/cli/ui"
 )
 
@@ -69,7 +70,13 @@ func (c *DockerLoginCommand) Run(args []string) int {
 		return 0
 	}
 
-	if _, _, err := c.RegistryCredentials.Upload(file); err != nil {
+	transformed, err := dockerconfig.Transform(file)
+	if err != nil {
+		c.UI.ErrorAPI(err)
+		return 1
+	}
+
+	if _, _, err := c.RegistryCredentials.Upload(transformed); err != nil {
 		c.UI.ErrorAPI(err)
 		return 1
 	}

@@ -414,7 +414,7 @@ func (m *mockRegistryCredentialsEndpoint) Upload(r io.Reader) (*api.StatusRespon
 		return nil, nil, err
 	}
 
-	if string(data) != `{"auth":"success"}` {
+	if string(data) != `{"auths":{"https://index.docker.io/v1/":{"auth":"aWxvcmVtOmlwc3Vt"}}}` {
 		return nil, nil, NewErrorResponse(http.StatusBadRequest, "Unable to upload docker credentials", "")
 	}
 
