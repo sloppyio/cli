@@ -3,6 +3,7 @@ package command
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,11 +28,13 @@ Usage: sloppy start [OPTIONS] FILENAME
 
 Options:
   -v, --var=[]     values to set for placeholders
+  -p, --project    project name
 
 Examples:
 
   sloppy start sloppy.json
   sloppy start --var=domain:mydomain.sloppy.zone --var=memory:128 myproject.json
+  sloppy start --project=myproject docker-compose.yml
 `
 	return strings.TrimSpace(helpText)
 }
@@ -40,9 +43,12 @@ Examples:
 // command-line args.
 func (c *StartCommand) Run(args []string) int {
 	var vars StringMap
+	var projectName string
 	cmdFlags := newFlagSet("start", flag.ContinueOnError)
 	cmdFlags.Var(&vars, "v", "")
 	cmdFlags.Var(&vars, "var", "")
+	cmdFlags.Var(&vars, "p", "")
+	cmdFlags.Var(&vars, "project", "")
 
 	if err := cmdFlags.Parse(args); err != nil {
 		c.UI.Error(err.Error())
@@ -71,10 +77,25 @@ func (c *StartCommand) Run(args []string) int {
 	}
 	defer file.Close()
 
-	decoder := newDecoder(file, vars)
-	var input = new(api.Project)
+	var inputSource io.Reader
+	inputSource = file
 
 	ext := filepath.Ext(file.Name())
+	if ext == ".yaml" || ext == ".yml" {
+		newSource, err := tryDockerCompose(file.Name(), projectName)
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("Converting docker-compose failed: %s", err))
+			return 1
+		}
+
+		if newSource != nil {
+			inputSource = newSource
+		}
+	}
+
+	decoder := newDecoder(inputSource, vars)
+	var input = new(api.Project)
+
 	switch ext {
 	case ".json":
 		if err := decoder.DecodeJSON(input); err != nil {
