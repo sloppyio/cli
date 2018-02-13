@@ -24,6 +24,18 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/aanand/compose-file"
+  packages = [
+    "interpolation",
+    "loader",
+    "schema",
+    "template",
+    "types"
+  ]
+  revision = "8b762b24ea40ea5ceda5aac2dd1cd465d0fe6d42"
+
+[[projects]]
+  branch = "master"
   name = "github.com/armon/go-radix"
   packages = ["."]
   revision = "1fca145dffbcaa8fe914309b1ec0cfc67500fe61"
@@ -85,8 +97,10 @@
     "pkg/tarsum",
     "pkg/term",
     "pkg/term/windows",
+    "pkg/urlutil",
     "registry",
-    "registry/resumable"
+    "registry/resumable",
+    "runconfig/opts"
   ]
   revision = "afbc9c4cfc5d6f812e3c11c0b0bae8be41f380f7"
 
@@ -115,6 +129,33 @@
   packages = ["."]
   revision = "0dadbb0345b35ec7ef35e228dabb8de89a65bf52"
   version = "v0.3.2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/docker/libcompose"
+  packages = [
+    "config",
+    "logger",
+    "lookup",
+    "project",
+    "project/events",
+    "project/options",
+    "utils",
+    "yaml"
+  ]
+  revision = "57bd716502dcbe1799f026148016022b0f3b989c"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/flynn/go-shlex"
+  packages = ["."]
+  revision = "3f9db97f856818214da2e1057f8ad84803971cff"
+
+[[projects]]
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -165,10 +206,22 @@
   version = "v0.0.2"
 
 [[projects]]
+  name = "github.com/mattn/go-shellwords"
+  packages = ["."]
+  revision = "02e3cf038dcea8290e44424da473dd12be796a8a"
+  version = "v1.0.3"
+
+[[projects]]
   branch = "master"
   name = "github.com/mitchellh/cli"
   packages = ["."]
   revision = "518dc677a1e1222682f4e7db06721942cb8e9e4c"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/mapstructure"
+  packages = ["."]
+  revision = "a4e142e9c047c904fa2f1e144d9a84e6133024bc"
 
 [[projects]]
   branch = "master"
@@ -222,6 +275,30 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/sloppyio/sloppose"
+  packages = ["pkg/converter"]
+  revision = "c2ad652aaf97a32bf16bd1374aa1ea905d6884ec"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/xeipuuv/gojsonpointer"
+  packages = ["."]
+  revision = "4e3ac2762d5f479393488629ee9370b50873b3a6"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/xeipuuv/gojsonreference"
+  packages = ["."]
+  revision = "bd5ef7bd5415a7ac448318e64f11a24cd21e594b"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/xeipuuv/gojsonschema"
+  packages = ["."]
+  revision = "8bcffc811467a5f691810420385be6e66b35a317"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   revision = "5119cf507ed5294cc409c092980c7497ee5d6fd2"
@@ -253,6 +330,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "52cbd145aeadc9876f2f98c532fa554dd37636227bc24a25dcb6824f104cf745"
+  inputs-digest = "bdf231717a82a138e1fb7fcb01c5821340ab8339c18420dea6a40b94fa0b6846"
   solver-name = "gps-cdcl"
   solver-version = 1
