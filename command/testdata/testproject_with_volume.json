@@ -20,6 +20,7 @@
           "volumes": [
             {
               "container_path": "/usr/share/docs",
+              "label": "volumelabel",
               "size": "8GB"
             }
           ]

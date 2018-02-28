@@ -69,6 +69,7 @@ type HealthCheck struct {
 // Volume represents a sloppy app volume.
 type Volume struct {
 	Path *string `json:"container_path,omitempty"`
+	Label *string `json:"label,omitempty"`
 	Size *string `json:"size,omitempty"`
 }
 
