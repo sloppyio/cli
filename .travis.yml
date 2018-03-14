@@ -28,7 +28,7 @@ deploy:
   file:
   - bundles/$TRAVIS_TAG/sloppy-darwin-amd64
   - bundles/$TRAVIS_TAG/sloppy-linux-amd64
-  - bundles/$TRAVIS_TAG/sloppy-windows-amd64
+  - bundles/$TRAVIS_TAG/sloppy-windows-amd64.exe
   skip_cleanup: true
   on:
     repo: sloppyio/cli
