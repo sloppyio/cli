@@ -36,7 +36,9 @@ Server has version: %s
 User has version: %s
 
 Check https://sloppy.io/knowledge-base/install-cli/ for install/update instructions
-and https://github.com/sloppyio/cli/blob/master/CHANGELOG.md for the changelog`, deployedVersion, command.Version)
+and https://github.com/sloppyio/cli/blob/master/CHANGELOG.md for the changelog
+
+`, deployedVersion, command.Version)
 	}
 
 	return false, ""
