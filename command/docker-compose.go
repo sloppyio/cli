@@ -30,7 +30,7 @@ func tryDockerCompose(fileName, projectName string) (reader io.Reader, err error
 		return nil, nil
 	}
 
-	cf, err := converter.NewComposeFile([][]byte{buf}, projectName)
+	cf, err := converter.NewComposeFile(buf, projectName)
 	if err != nil {
 		return nil, err
 	}
