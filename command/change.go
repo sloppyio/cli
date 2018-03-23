@@ -3,6 +3,7 @@ package command
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -41,11 +42,14 @@ Options:
   -e, --env=[]          set environment variables
   -v, --var=[]          values to set for placeholders
   -f, --force           set force flag
+  -p, --project         project name
 
 Examples:
 
   sloppy change sloppy.json
+  sloppy change -p letschat docker-compose.yml
   sloppy change -var=domain:abc.sloppy.zone letschat.json
+  sloppy change -var=domain:abc.sloppy.zone -p letschat docker-compose.yml
   sloppy change -m 128 letschat/frontend/apache
   sloppy change --instances 2 letschat/frontend/apache
 `
@@ -152,11 +156,14 @@ func (c *ChangeCommand) updateApp(args []string) int {
 func (c *ChangeCommand) updateProject(args []string) int {
 	var vars StringMap
 	var force bool
+	var projectName string
 	cmdFlags := newFlagSet("change", flag.ContinueOnError)
 	cmdFlags.Var(&vars, "var", "")
 	cmdFlags.Var(&vars, "v", "")
 	cmdFlags.BoolVar(&force, "f", false, "")
 	cmdFlags.BoolVar(&force, "force", false, "")
+	cmdFlags.StringVar(&projectName, "p", "", "")
+	cmdFlags.StringVar(&projectName, "project", "", "")
 
 	if err := cmdFlags.Parse(args); err != nil {
 		c.UI.Error(err.Error())
@@ -179,7 +186,6 @@ func (c *ChangeCommand) updateProject(args []string) int {
 	}
 
 	filename := cmdFlags.Arg(0)
-	var projectName string
 	if cmdFlags.NArg() == 2 {
 		c.UI.Warn("set project name explicitly is deprecated.")
 		projectName = cmdFlags.Arg(0)
@@ -201,10 +207,25 @@ func (c *ChangeCommand) updateProject(args []string) int {
 	}
 	defer file.Close()
 
-	decoder := newDecoder(file, vars)
-	var input = new(api.Project)
+	var inputSource io.Reader
+	inputSource = file
 
 	ext := filepath.Ext(file.Name())
+	if ext == ".yaml" || ext == ".yml" {
+		newSource, err := tryDockerCompose(file.Name(), projectName)
+		if err != nil {
+			c.UI.Error(fmt.Sprintf("Converting docker-compose failed: %s", err))
+			return 1
+		}
+
+		if newSource != nil {
+			inputSource = newSource
+		}
+	}
+
+	decoder := newDecoder(inputSource, vars)
+	var input = new(api.Project)
+
 	switch ext {
 	case ".json":
 		if err := decoder.DecodeJSON(input); err != nil {

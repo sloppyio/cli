@@ -117,6 +117,12 @@
   version = "v0.3.2"
 
 [[projects]]
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/gogo/protobuf"
   packages = ["proto"]
   revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
@@ -221,6 +227,15 @@
   version = "v1.0.3"
 
 [[projects]]
+  name = "github.com/sloppyio/sloppose"
+  packages = [
+    "pkg/config",
+    "pkg/converter"
+  ]
+  revision = "4cc8fca325114c7d5c3c87a714f414e5028fc8b0"
+  version = "v0.1.4"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -253,6 +268,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "52cbd145aeadc9876f2f98c532fa554dd37636227bc24a25dcb6824f104cf745"
+  inputs-digest = "bdf231717a82a138e1fb7fcb01c5821340ab8339c18420dea6a40b94fa0b6846"
   solver-name = "gps-cdcl"
   solver-version = 1

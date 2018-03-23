@@ -1,0 +1,7 @@
+version: "3"
+
+services:
+  foo:
+    image: golang
+    ports:
+    - 80:8080
