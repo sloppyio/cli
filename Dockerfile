@@ -9,9 +9,8 @@ RUN apt-get -y -q update && \
     curl -fsSL "$JQ_DOWNLOAD_URL" -o jq && \
     chmod +x jq && mv jq /usr/local/bin/jq
 
-# godep
-RUN go get github.com/tools/godep && \
-    go install github.com/tools/godep
+# dep
+RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 # Windows Resource generation
 RUN go get github.com/josephspurrier/goversioninfo && \
