@@ -3,6 +3,8 @@ package converter
 import (
 	"errors"
 	"fmt"
+	"math"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -73,16 +75,39 @@ func NewSloppyFile(cf *ComposeFile) (*SloppyFile, error) {
 			},
 		}
 
+		// Entrypoint (string or list)
+		// Prepend to the following commands
+		switch config.Entrypoint.(type) {
+		case string:
+			c := config.Entrypoint.(string)
+			app.App.Command = &c
+		case []interface{}:
+			c := config.Entrypoint.([]interface{})
+			if len(c) > 0 {
+				app.App.Command = sf.convertCommand(c)
+			}
+		}
+
 		// Assign possible empty values in extra steps to hide empty object from output
 		// Commands (string or list)
 		switch config.Command.(type) {
 		case string:
 			c := config.Command.(string)
-			app.App.Command = &c
+			if app.App.Command != nil {
+				cmd := fmt.Sprintf("%s %s", *app.App.Command, c)
+				app.App.Command = &cmd
+			} else {
+				app.App.Command = &c
+			}
 		case []interface{}:
 			c := config.Command.([]interface{})
 			if len(c) > 0 {
-				app.App.Command = sf.convertCommand(c)
+				if app.App.Command != nil {
+					cmd := fmt.Sprintf("%s %s", *app.App.Command, *sf.convertCommand(c))
+					app.App.Command = &cmd
+				} else {
+					app.App.Command = sf.convertCommand(c)
+				}
 			}
 		}
 
@@ -133,6 +158,8 @@ func NewSloppyFile(cf *ComposeFile) (*SloppyFile, error) {
 				switch entry.(type) { // number, string, obj
 				case string:
 					ports = append(ports, entry.(string))
+				case float64:
+					ports = append(ports, strconv.Itoa(int(entry.(float64))))
 				case int:
 					p := strconv.Itoa(entry.(int))
 					ports = append(ports, p)
@@ -146,6 +173,20 @@ func NewSloppyFile(cf *ComposeFile) (*SloppyFile, error) {
 			// In yml format just one port is supported, use the first one.
 			// And don't set app.App.PortMappings.
 			app.Port = portMappings[0].Port
+		}
+
+		if config.Deploy != nil {
+			if config.Deploy.Replicas > 0 {
+				app.Instances = &config.Deploy.Replicas
+			}
+			if config.Deploy.Resources != nil &&
+				config.Deploy.Resources.Limits != nil {
+				var err error
+				app.Memory, err = sf.convertMemoryResource(config.Deploy.Resources.Limits.Memory)
+				if err != nil {
+					return nil, err
+				}
+			}
 		}
 
 		// TODO implement service to compose-file mapping
@@ -170,6 +211,36 @@ func (sf *SloppyFile) convertCommand(cmd []interface{}) *string {
 		}
 	}
 	return &str
+}
+
+var resourceMemRegex = regexp.MustCompile(`^(\d+)([bkmgBKMG])$`)
+
+func (sf *SloppyFile) convertMemoryResource(res string) (*int, error) {
+	const lowestMem float64 = 64 // lowest mem size sloppy.io supports
+	formatErr := fmt.Errorf(`convert resource failed: unsupported memory format: %q in "Deploy.Resources.Limits.Memory"`, res)
+	match := resourceMemRegex.FindStringSubmatch(res)
+	if len(match) == 3 {
+		memResource, err := strconv.Atoi(match[1])
+		if err != nil {
+			return nil, err
+		}
+		unit := strings.ToLower(match[2])
+		var mem int
+		switch unit {
+		case "b":
+			mem = int(math.Max(float64(memResource/1024/1024), lowestMem))
+		case "k":
+			mem = int(math.Max(float64(memResource/1024), lowestMem))
+		case "m":
+			mem = memResource
+		case "g":
+			mem = memResource * 1024
+		default:
+			return nil, formatErr
+		}
+		return &mem, nil
+	}
+	return nil, formatErr
 }
 
 func (sf *SloppyFile) convertPorts(ports []string) (pm []*sloppy.PortMap, err error) {
