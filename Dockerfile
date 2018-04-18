@@ -7,12 +7,16 @@ ENV JQ_DOWNLOAD_URL https://github.com/stedolan/jq/releases/download/jq-$JQ_VERS
 RUN apt-get -y -q update && \
     apt-get -y -q install httpie && \
     curl -fsSL "$JQ_DOWNLOAD_URL" -o jq && \
-    chmod +x jq && mv jq /usr/local/bin/jq && \
-    # godep
-    go get github.com/tools/godep && \
-    # Windows Resource generation
-    go get github.com/josephspurrier/goversioninfo && \
-    go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo && \
-    # Bats
-    curl -sSL https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz -o bats.tar.gz && \
+    chmod +x jq && mv jq /usr/local/bin/jq
+
+# godep
+RUN go get github.com/tools/godep && \
+    go install github.com/tools/godep
+
+# Windows Resource generation
+RUN go get github.com/josephspurrier/goversioninfo && \
+    go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
+
+# Bats
+RUN curl -sSL https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz -o bats.tar.gz && \
     tar -xf bats.tar.gz && ./bats-0.4.0/install.sh /usr/local && rm -rf bats-0.4.0
