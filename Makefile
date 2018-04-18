@@ -6,6 +6,8 @@ GIT_COMMIT=$(shell git rev-parse HEAD)
 # Default docker image
 DOCKER_IMAGE := sloppy/go-cross:latest
 
+SLOPPOSE=github.com/sloppyio/sloppose/pkg/converter
+
 # env vars passed through directly to Docker's build scripts
 DOCKER_ENVS := \
 	-e GIT_COMMIT=$(GIT_COMMIT)\
@@ -39,6 +41,9 @@ beta: bundle
 
 test: bundle
 	$(DOCKER_RUN_DOCKER) scripts/make.sh test
+
+update-sloppose:
+	$(DOCKER_RUN_DOCKER) go get -u $(SLOPPOSE) && godep update $(SLOPPOSE)
 
 test-local: bundle
 	scripts/make.sh test
