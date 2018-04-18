@@ -40,6 +40,9 @@ beta: bundle
 test: bundle
 	$(DOCKER_RUN_DOCKER) scripts/make.sh test
 
+update-vendor:
+	$(DOCKER_RUN_DOCKER) dep ensure -update github.com/sloppyio/sloppose
+
 test-local: bundle
 	scripts/make.sh test
 

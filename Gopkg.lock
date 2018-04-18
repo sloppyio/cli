@@ -232,8 +232,8 @@
     "pkg/config",
     "pkg/converter"
   ]
-  revision = "4cc8fca325114c7d5c3c87a714f414e5028fc8b0"
-  version = "v0.1.4"
+  revision = "4a04fd0b1b89adc166427897830cdb328cbca719"
+  version = "v0.1.5"
 
 [[projects]]
   branch = "master"
