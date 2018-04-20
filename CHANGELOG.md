@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.11.1 (2018-04-18)
+
++ feat(docker-compose): support for deploying from docker-compose.yml files
+
+## 1.10.0 (2018-02-28)
+
++ feat(docker-login-keystores): support reading native keystores for docker-login, see #34
+
 ## 1.9.0 (2018-01-19)
 + feat(log-filter): the logs can be filtered by date range
 
