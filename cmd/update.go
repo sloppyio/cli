@@ -35,7 +35,7 @@ func checkVersion() (bool, string) {
 Server has version: %s
 User has version: %s
 
-Check https://sloppy.io/knowledge-base/install-cli/ for install/update instructions
+Check https://kb.sloppy.io/getting-started/getting-started-with-the-cli-launch-your-first-dockerized-app/step-1-install-the-cli for install/update instructions
 and https://github.com/sloppyio/cli/blob/master/CHANGELOG.md for the changelog
 
 `, deployedVersion, command.Version)
