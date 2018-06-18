@@ -362,10 +362,6 @@ func TestDecodeYAML_errors(t *testing.T) {
 			out: "'app1.image' needs to be a string",
 		},
 		{
-			in:  "version: v1\nservices:\n\tservice1:\n\t\tapp1:\n\t\t\tdomain: 1",
-			out: "'app1.domain' needs to be a string",
-		},
-		{
 			in:  "version: v1\nservices:\n\tservice1:\n\t\tapp1:\n\t\t\tcmd: 1",
 			out: "'app1.cmd' needs to be a string",
 		},

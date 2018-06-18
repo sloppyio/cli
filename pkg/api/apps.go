@@ -48,7 +48,10 @@ func (a *App) String() string {
 
 // Domain represents sloppy domain.
 type Domain struct {
-	URI *string `json:"uri,omitempty"`
+	URI           *string `json:"uri,omitempty"`
+	RedirectHttps *bool   `json:"redirectHttps,omitempty"`
+	HstsHeader    *bool   `json:"hstsHeader,omitempty"`
+	BasicAuth     *string `json:"basicAuth,omitempty"`
 }
 
 // PortMap represents a sloppy port map.
