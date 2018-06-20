@@ -47,8 +47,8 @@ func (c *StartCommand) Run(args []string) int {
 	cmdFlags := newFlagSet("start", flag.ContinueOnError)
 	cmdFlags.Var(&vars, "v", "")
 	cmdFlags.Var(&vars, "var", "")
-	cmdFlags.Var(&vars, "p", "")
-	cmdFlags.Var(&vars, "project", "")
+	cmdFlags.StringVar(&projectName, "p", "", "")
+	cmdFlags.StringVar(&projectName, "project", "", "")
 
 	if err := cmdFlags.Parse(args); err != nil {
 		c.UI.Error(err.Error())
