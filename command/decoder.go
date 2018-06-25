@@ -226,6 +226,12 @@ func (p *project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 							} else {
 								return &yamlError{namespace: id, key: parameter, message: "needs to be boolean"}
 							}
+						case "forceRollingDeploy":
+							if forceRollingDeploy, ok := thirdLevel.Value.(bool); ok {
+								app.ForceRollingDeploy = api.Bool(forceRollingDeploy)
+							} else {
+								return &yamlError{namespace: id, key: parameter, message: "needs to be boolean"}
+							}
 						case "cmd":
 							if cmd, ok := thirdLevel.Value.(string); ok {
 								app.Command = api.String(cmd)

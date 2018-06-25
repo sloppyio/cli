@@ -14,22 +14,23 @@ type AppsEndpoint struct {
 
 // App represents a sloppy app.
 type App struct {
-	ID           *string           `json:"id,omitempty"`
-	Status       []string          `json:"status,omitempty"`
-	Domain       *Domain           `json:"domain,omitempty"`
-	SSL          *bool             `json:"ssl,omitempty"`
-	Memory       *int              `json:"mem,omitempty"`
-	Instances    *int              `json:"instances,omitempty"`
-	Image        *string           `json:"image,omitempty"`
-	Version      *string           `json:"version,omitempty"`
-	Versions     []string          `json:"versions,omitempty"`
-	Command      *string           `json:"cmd,omitempty"`
-	PortMappings []*PortMap        `json:"port_mappings,omitempty"`
-	Dependencies []string          `json:"dependencies,omitempty"`
-	EnvVars      map[string]string `json:"env,omitempty"`
-	Volumes      []*Volume         `json:"volumes,omitempty"`
-	HealthChecks []*HealthCheck    `json:"health_checks,omitempty"`
-	Logging      *Logging          `json:"logging,omitempty"`
+	ID                   *string           `json:"id,omitempty"`
+	Status               []string          `json:"status,omitempty"`
+	Domain               *Domain           `json:"domain,omitempty"`
+	SSL                  *bool             `json:"ssl,omitempty"`
+	ForceRollingDeploy   *bool             `json:"ssl,omitempty"`
+	Memory               *int              `json:"mem,omitempty"`
+	Instances            *int              `json:"instances,omitempty"`
+	Image                *string           `json:"image,omitempty"`
+	Version              *string           `json:"version,omitempty"`
+	Versions             []string          `json:"versions,omitempty"`
+	Command              *string           `json:"cmd,omitempty"`
+	PortMappings         []*PortMap        `json:"port_mappings,omitempty"`
+	Dependencies         []string          `json:"dependencies,omitempty"`
+	EnvVars              map[string]string `json:"env,omitempty"`
+	Volumes              []*Volume         `json:"volumes,omitempty"`
+	HealthChecks         []*HealthCheck    `json:"health_checks,omitempty"`
+	Logging              *Logging          `json:"logging,omitempty"`
 }
 
 // Returns the count how often the given status was found
