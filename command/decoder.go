@@ -185,12 +185,12 @@ func (p *project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 								if !ok {
 									return &yamlError{namespace: id, key: parameter, message: "expected to be a domain object"}
 								}
+								domain := &api.Domain{}
 								for i, mapItem := range m {
 									key, ok := mapItem.Key.(string)
 									if !ok {
 										return &yamlError{namespace: id, key: parameter, index: i, message: "key needs to be a string"}
 									}
-									domain := &api.Domain{}
 									switch key {
 										case "uri": {
 											value, ok := mapItem.Value.(string)

@@ -18,7 +18,7 @@ type App struct {
 	Status               []string          `json:"status,omitempty"`
 	Domain               *Domain           `json:"domain,omitempty"`
 	SSL                  *bool             `json:"ssl,omitempty"`
-	ForceRollingDeploy   *bool             `json:"ssl,omitempty"`
+	ForceRollingDeploy   *bool             `json:"forceRollingDeploy,omitempty"`
 	Memory               *int              `json:"mem,omitempty"`
 	Instances            *int              `json:"instances,omitempty"`
 	Image                *string           `json:"image,omitempty"`

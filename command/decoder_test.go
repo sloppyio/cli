@@ -189,10 +189,10 @@ func TestDecodeYAML(t *testing.T) {
 				ID: api.String("frontend"),
 				Apps: []*api.App{
 					{
-						ID:    api.String("apache"),
-						Image: api.String("wordpress:4.2"),
-						ForceRollingDeploy:   api.Bool(true),
-						SSL:   api.Bool(true),
+						ID:                 api.String("apache"),
+						Image:              api.String("wordpress:4.2"),
+						ForceRollingDeploy: api.Bool(true),
+						SSL:                api.Bool(true),
 						Domain: &api.Domain{
 							URI: api.String("superblog.volks.cloud"),
 						},
@@ -314,8 +314,10 @@ func TestDecodeYAML_LbYAML(t *testing.T) {
 						ID:    api.String("apache"),
 						Image: api.String("wordpress:4.2"),
 						Domain: &api.Domain{
+							URI: api.String("superblog.volks.cloud"),
 							RedirectHttps: api.Bool(true),
-							HstsHeader:    api.Bool(true),
+							HstsHeader: api.Bool(true),
+							BasicAuth: api.String("basic-auth"),
 						},
 					},
 				},
@@ -701,7 +703,7 @@ services:
     apache:
       image: "wordpress:4.2"
       ssl: true
-      forceRollingDeploy: true,
+      forceRollingDeploy: true
       instances: 1
       mem: 512
       domain: "superblog.volks.cloud"
@@ -749,8 +751,10 @@ services:
     apache:
       image: "wordpress:4.2"
       domain:
-        redirectHttps: "true"
-        hstsHeader: "true"
+        uri: "superblog.volks.cloud"
+        redirectHttps: true
+        hstsHeader: true
+        basicAuth: "basic-auth"
 `
 var testMinimalYAMLInput = `version: "v1"
 project: "wordpress"
