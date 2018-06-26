@@ -181,11 +181,54 @@ func (p *project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 							if domain, ok := thirdLevel.Value.(string); ok {
 								app.Domain = &api.Domain{URI: api.String(domain)}
 							} else {
-								return &yamlError{namespace: id, key: parameter, message: "needs to be a string"}
+								m, ok := thirdLevel.Value.(yaml.MapSlice)
+								if !ok {
+									return &yamlError{namespace: id, key: parameter, message: "expected to be a domain object"}
+								}
+								domain := &api.Domain{}
+								for i, mapItem := range m {
+									key, ok := mapItem.Key.(string)
+									if !ok {
+										return &yamlError{namespace: id, key: parameter, index: i, message: "key needs to be a string"}
+									}
+									switch key {
+										case "uri": {
+											value, ok := mapItem.Value.(string)
+											if (ok) {
+												domain.URI = api.String(value)
+											}
+										}
+										case "redirectHttps": {
+											value, ok := mapItem.Value.(bool)
+											if (ok) {
+												domain.RedirectHttps = api.Bool(value)
+											}
+										}
+										case "hstsHeader": {
+											value, ok := mapItem.Value.(bool)
+											if (ok) {
+												domain.HstsHeader = api.Bool(value)
+											}
+										}
+										case "basicAuth": {
+											value, ok := mapItem.Value.(string)
+											if (ok) {
+												domain.BasicAuth = api.String(value)
+											}
+										}
+									}
+									app.Domain = domain
+								}
 							}
 						case "ssl":
 							if ssl, ok := thirdLevel.Value.(bool); ok {
 								app.SSL = api.Bool(ssl)
+							} else {
+								return &yamlError{namespace: id, key: parameter, message: "needs to be boolean"}
+							}
+						case "forceRollingDeploy":
+							if forceRollingDeploy, ok := thirdLevel.Value.(bool); ok {
+								app.ForceRollingDeploy = api.Bool(forceRollingDeploy)
 							} else {
 								return &yamlError{namespace: id, key: parameter, message: "needs to be boolean"}
 							}

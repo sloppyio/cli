@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"gopkg.in/yaml.v2"
-
 	"github.com/sloppyio/cli/pkg/api"
 )
 
@@ -190,9 +189,10 @@ func TestDecodeYAML(t *testing.T) {
 				ID: api.String("frontend"),
 				Apps: []*api.App{
 					{
-						ID:    api.String("apache"),
-						Image: api.String("wordpress:4.2"),
-						SSL:   api.Bool(true),
+						ID:                 api.String("apache"),
+						Image:              api.String("wordpress:4.2"),
+						ForceRollingDeploy: api.Bool(true),
+						SSL:                api.Bool(true),
 						Domain: &api.Domain{
 							URI: api.String("superblog.volks.cloud"),
 						},
@@ -295,7 +295,40 @@ func TestDecodeYAML_minimalYAML(t *testing.T) {
 		t.Errorf("App = %+v, want %+v", input, want)
 	}
 }
+func TestDecodeYAML_LbYAML(t *testing.T) {
+	reader := strings.NewReader(testLbYAMLInput)
+	d := newDecoder(reader, StringMap{})
+	input := new(api.Project)
 
+	if err := d.DecodeYAML(input); err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	want := &api.Project{
+		Name: api.String("wordpress"),
+		Services: []*api.Service{
+			{
+				ID: api.String("frontend"),
+				Apps: []*api.App{
+					{
+						ID:    api.String("apache"),
+						Image: api.String("wordpress:4.2"),
+						Domain: &api.Domain{
+							URI: api.String("superblog.volks.cloud"),
+							RedirectHttps: api.Bool(true),
+							HstsHeader: api.Bool(true),
+							BasicAuth: api.String("basic-auth"),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(input, want) {
+		t.Errorf("App = %+v, want %+v", input, want)
+	}
+}
 func TestDecodeYAML_errors(t *testing.T) {
 	var errorsTests = []struct {
 		in  string
@@ -360,10 +393,6 @@ func TestDecodeYAML_errors(t *testing.T) {
 		{
 			in:  "version: v1\nservices:\n\tservice1:\n\t\tapp1:\n\t\t\timage: 1",
 			out: "'app1.image' needs to be a string",
-		},
-		{
-			in:  "version: v1\nservices:\n\tservice1:\n\t\tapp1:\n\t\t\tdomain: 1",
-			out: "'app1.domain' needs to be a string",
 		},
 		{
 			in:  "version: v1\nservices:\n\tservice1:\n\t\tapp1:\n\t\t\tcmd: 1",
@@ -674,6 +703,7 @@ services:
     apache:
       image: "wordpress:4.2"
       ssl: true
+      forceRollingDeploy: true
       instances: 1
       mem: 512
       domain: "superblog.volks.cloud"
@@ -714,6 +744,18 @@ services:
           syslog-address: "tcp://192.168.0.42:123"
 `
 
+var testLbYAMLInput = `version: "v1"
+project: "wordpress"
+services:
+  frontend:
+    apache:
+      image: "wordpress:4.2"
+      domain:
+        uri: "superblog.volks.cloud"
+        redirectHttps: true
+        hstsHeader: true
+        basicAuth: "basic-auth"
+`
 var testMinimalYAMLInput = `version: "v1"
 project: "wordpress"
 services:
