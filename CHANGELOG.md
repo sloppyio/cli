@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.12.0 (2016-06-26)
+
+* feat: Add Load Balancer properties to domain 
+* fix: update docker-compose support, to always set ssl:true when configuring a domain
+* fix: sloppy-start now properly uses the `-p`/`-project` argument
+
 ## 1.11.1 (2018-04-18)
 
 + feat(docker-compose): support for deploying from docker-compose.yml files
