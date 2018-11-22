@@ -14,41 +14,5 @@ echo "mode: atomic" > ./coverage.txt
 grep -h -v "^mode:" ./*.cover >> ./coverage.txt && rm ./*.cover
 
 if [ $? == 0 ]; then
-  echo "==> Successfully"
-fi
-
-# skip integration tests on Travis
-if [ $CI == "true" ]; then
-  exit 0
-fi
-
-echo "Start integration tests"
-
-set -- $1 "test"
-output="sloppy"
-source "${__scripts}/compile.sh"
-
-export SLOPPY_API_URL=https://api.sloppy.io/v1/
-export PATH="${BUILD_TARGET}:$PATH"
-
-{
-  bats --version > /dev/null
-} || {
-  echo "Integration tests are not supported by your OS. (or bats is not installed)"
-  exit 1
-}
-
-# Ensure a clean stage
-sloppy delete -f apache || true
-
-bats ${__tests}/integration/cli/tests.bats
-bats ${__tests}/integration/cli/volume.bats
-
-unset SLOPPY_APITOKEN
-bats ${__tests}/integration/cli/nologin.bats
-
-
-if [ $? == 0 ]; then
-  echo "Output: ${BUILD_TARGET}/${output:-sloppy}"
-  echo "==> Successfully"
+  echo "==> Successfull"
 fi

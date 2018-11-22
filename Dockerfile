@@ -13,7 +13,3 @@ RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 # Windows Resource generation
 RUN go get github.com/josephspurrier/goversioninfo && \
     go install github.com/josephspurrier/goversioninfo/cmd/goversioninfo
-
-# Bats
-RUN curl -sSL https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz -o bats.tar.gz && \
-    tar -xf bats.tar.gz && ./bats-0.4.0/install.sh /usr/local && rm -rf bats-0.4.0
