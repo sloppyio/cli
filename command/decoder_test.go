@@ -232,6 +232,7 @@ func TestDecodeYAML(t *testing.T) {
 						PortMappings: []*api.PortMap{
 							{
 								Port: api.Int(3306),
+								ServicePort: api.Int(32005),
 							},
 						},
 						Volumes: []*api.Volume{
@@ -721,6 +722,7 @@ services:
       mem: 512
       cmd: "mysqld"
       port: 3306
+      servicePort: 32005
       volumes:
         -
           path: "/var/lib/mysql"

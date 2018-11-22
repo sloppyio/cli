@@ -189,7 +189,11 @@ func listApp(w io.Writer, app *api.App) {
 		fmt.Fprint(&buf, "Ports:")
 	}
 	for _, value := range app.PortMappings {
-		fmt.Fprintf(&buf, "\t\t %d\n", *value.Port)
+		if (value.ServicePort == nil) {
+			fmt.Fprintf(&buf, "\t\t %d\n", *value.Port)
+		} else {
+			fmt.Fprintf(&buf, "\t\t %d:%d\n", *value.ServicePort, *value.Port)
+		}
 	}
 
 	if app.Logging != nil {

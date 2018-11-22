@@ -14,7 +14,8 @@
                     "instances": $instances,
                     "port_mappings": [
                         {
-                            "container_port": 5000
+                            "container_port": 5000,
+                            "service_port": 0
                         }
                     ],
                     "volumes": [
