@@ -19,7 +19,7 @@ When actually working on issues, please:
 
 4. Even if it's a minor change, you should always write tests
 
-5. Run `make test` or `scripts/make.sh test`
+5. Run `make test` or `scripts/test.sh`
 
 6. Try to write good commit messages for each change. Use the [angularjs commit message guide](https://gist.github.com/stephenparish/9941e89d80e2bc58a153)
 

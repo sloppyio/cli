@@ -8,8 +8,7 @@ DOCKER_IMAGE := sloppy/go-cross:latest
 
 # env vars passed through directly to Docker's build scripts
 DOCKER_ENVS := \
-	-e GIT_COMMIT=$(GIT_COMMIT)\
-	-e CI=$(CI)
+	-e GIT_COMMIT=$(GIT_COMMIT)
 
 
 DOCKER_MOUNT := -v "$(CURDIR):/go/src/github.com/sloppyio/cli" \
@@ -38,7 +37,7 @@ beta: bundle
 	$(DOCKER_RUN_DOCKER) scripts/make.sh cross beta
 
 test: bundle
-	$(DOCKER_RUN_DOCKER) scripts/make.sh test
+	$(DOCKER_RUN_DOCKER) scripts/test.sh
 
 update-vendor:
 	$(DOCKER_RUN_DOCKER) dep ensure -update github.com/sloppyio/sloppose
