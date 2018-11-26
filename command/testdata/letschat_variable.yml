@@ -19,3 +19,4 @@ services:
       image: mongodb
       instances: 1
       port: 27017
+      servicePort: 0

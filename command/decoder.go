@@ -254,7 +254,21 @@ func (p *project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 							fallthrough
 						case "port":
 							if port, ok := thirdLevel.Value.(int); ok {
-								app.PortMappings = []*api.PortMap{{Port: api.Int(port)}}
+								if (app.PortMappings == nil) {
+									app.PortMappings = []*api.PortMap{{Port: api.Int(port)}}
+								} else {
+									app.PortMappings[0].Port = api.Int(port)
+								}
+							} else {
+								return &yamlError{namespace: id, key: parameter, message: "needs to be an integer"}
+							}
+						case "servicePort":
+							if port, ok := thirdLevel.Value.(int); ok {
+								if (app.PortMappings == nil) {
+									app.PortMappings = []*api.PortMap{{ServicePort: api.Int(port)}}
+								} else {
+									app.PortMappings[0].ServicePort = api.Int(port)
+								}
 							} else {
 								return &yamlError{namespace: id, key: parameter, message: "needs to be an integer"}
 							}

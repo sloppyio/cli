@@ -58,6 +58,7 @@ type Domain struct {
 // PortMap represents a sloppy port map.
 type PortMap struct {
 	Port *int `json:"container_port,omitempty"`
+	ServicePort *int `json:"service_port,omitempty"`
 }
 
 // HealthCheck represents a sloppy health check.
