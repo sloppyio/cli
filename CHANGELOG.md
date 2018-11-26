@@ -1,8 +1,12 @@
 # Changelog
 
-## 1.12.0 (2016-06-26)
+## 1.13.0 (2018-11-26)
 
-* feat: Add Load Balancer properties to domain 
+* feat: support tcp ports, via port_mappings[].service_port
+
+## 1.12.0 (2018-06-26)
+
+* feat: Add Load Balancer properties to domain
 * fix: update docker-compose support, to always set ssl:true when configuring a domain
 * fix: sloppy-start now properly uses the `-p`/`-project` argument
 
