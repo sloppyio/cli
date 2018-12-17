@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.13.1 (2018-12-17)
+
+* fix(stats): show stats from projects with dashes in name
+
 ## 1.13.0 (2018-11-26)
 
 * feat: support tcp ports, via port_mappings[].service_port

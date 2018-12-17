@@ -75,8 +75,8 @@ func TestStatsCommand_withAllFlag(t *testing.T) {
 	}
 
 	// FIXME - table head tab differs between tests
-	//	want := `CONTAINER 		 CPU % 	 MEM / LIMIT 		 MEM % 	 NET I/O Extern 	 NET I/O Intern 	 MAX VOLUME % 	 LAST UPDATE
-	//frontend/node-59f7ed 	 0.0% 	 128 MiB / 1024 MiB 	 12.5% 	 7.71 B / 0 B 	 18.1 B / 0 B 	 23.4% 		 2 hours`
+	//	want := `CONTAINER 		 CPU % 	 MEM / LIMIT 		 MEM % 	 NET I/O Extern 	 NET I/O Intern
+	//frontend/node-59f7ed 	 0.0% 	 128 MiB / 1024 MiB 	 12.5% 	 7.71 B / 0 B 	 18.1 B / 0 B`
 
 	if exitCode := c.Run(args); exitCode != 0 {
 		t.Error(mockUI.ErrorWriter.String())
