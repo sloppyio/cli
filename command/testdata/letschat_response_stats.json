@@ -198,46 +198,6 @@
           ]
         }
       ]
-    },
-    {
-      "metric": "container_volume_usage_percentage",
-      "unit": "percentage",
-      "values": [
-        {
-          "name": "USERNAME-letschat_frontend_node./var/www",
-          "data": [
-            {
-              "x": 1502197200000,
-              "y": 12.2
-            },
-            {
-              "x": 1502198400000,
-              "y": 12.2
-            },
-            {
-              "x": 1502199600000,
-              "y": 12.2
-            }
-          ]
-        },
-        {
-          "name": "USERNAME-letschat_frontend_node./var/test",
-          "data": [
-            {
-              "x": 1502197200000,
-              "y": 23.4
-            },
-            {
-              "x": 1502198400000,
-              "y": 23.4
-            },
-            {
-              "x": 1502199600000,
-              "y": 23.4
-            }
-          ]
-        }
-      ]
     }
   ]
 }

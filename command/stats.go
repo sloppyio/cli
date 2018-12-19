@@ -29,7 +29,7 @@ func (c *StatsCommand) Help() string {
 	helpText := `
 Usage: sloppy stats [OPTIONS] PROJECT
 
-  Displays usage statistics of running instances(memory, traffic)
+  Displays usage statistics of running instances (memory, traffic)
 
 Options:
   -a, --all     Show all instances (default shows just running instances)
@@ -82,7 +82,7 @@ func (c *StatsCommand) Run(args []string) int {
 	var buf bytes.Buffer
 	w := new(tabwriter.Writer)
 	w.Init(&buf, 0, 8, 0, '\t', 0)
-	fmt.Fprintf(w, "CONTAINER \t CPU %% \t MEM / LIMIT \t MEM %% \t NET I/O Extern \t NET I/O Intern \t MAX VOLUME %% \t LAST UPDATE\n")
+	fmt.Fprintf(w, "CONTAINER \t CPU %% \t MEM / LIMIT \t MEM %% \t NET I/O Extern \t NET I/O Intern\n")
 
 	var keys []string
 	var latest api.Timestamp
@@ -129,20 +129,16 @@ type stat struct {
 	InternalNetworkTx float64
 	ExternalNetworkRx float64
 	ExternalNetworkTx float64
-	Volumes           int     // VolumeCount
-	Volume            float64 // VolumePercentage
 }
 
 func (s *stat) String() string {
-	return fmt.Sprintf("%s/%s-%s \t %.1f%% \t %s / %.f MiB \t %.1f%% \t %s / %s \t %s / %s \t %.1f%% \t %s",
+	return fmt.Sprintf("%s/%s-%s \t %.1f%% \t %s / %.f MiB \t %.1f%% \t %s / %s \t %s / %s",
 		s.Service, s.App, s.ID[:6],
 		s.CPU,
 		humanByte(s.Memory), s.MemoryLimit,
 		float64(s.Memory/(1<<20))/float64(s.MemoryLimit)*100,
 		humanByte(s.ExternalNetworkRx), humanByte(s.ExternalNetworkTx),
 		humanByte(s.InternalNetworkRx), humanByte(s.InternalNetworkTx),
-		s.Volume,
-		humanDuration(time.Now().Sub(s.Time.Time)),
 	)
 }
 
@@ -163,12 +159,6 @@ type MetricFetchResult struct {
 	metrics api.Metrics
 	err     error
 }
-
-func (m Metrics) Len() int { return len(m) }
-
-// Volume metrics needs to be the last one due to their missing uuid
-func (m Metrics) Less(i, j int) bool { return strings.Contains(m[j].metricName, "volume") }
-func (m Metrics) Swap(i, j int)      { m[i], m[j] = m[j], m[i] }
 
 // Collect collects all statistics from all running apps, aggregate and merge them.
 func (c *StatsCommand) collect(project *api.Project) (map[string]*stat, error) {
@@ -231,19 +221,14 @@ func (c *StatsCommand) fetchAll(project *api.Project, quit chan struct{}) <-chan
 
 func (c *StatsCommand) aggregate(metrics []*Metric) (map[string]*stat, error) {
 	stats := make(map[string]*stat)
-	regex := regexp.MustCompile(`^(\w+)-(\w+).([a-z0-9-]{36}|([a-z/+]+)$)`)
-	var id string
+	regex := regexp.MustCompile(`^(\w+)-([\w-]+).([a-z0-9-]{36}|([a-z/+]+)$)`)
 	var p stat
 	for _, metric := range metrics {
 		matches := regex.FindStringSubmatch(metric.seriesName)
 		if len(matches) == 0 || len(matches) < 3 {
-			return nil, fmt.Errorf("invalid metric series name %q", metric.metricName)
+			return nil, fmt.Errorf("invalid metric series name %q", metric.seriesName)
 		}
-		uuid := matches[3]
-		// Volume metrics does not contain a uuid, use the previous one
-		if !strings.Contains(metric.metricName, "volume") {
-			id = uuid
-		}
+		id := matches[3]
 
 		s := &stat{
 			App:               *metric.app.ID,
@@ -251,14 +236,12 @@ func (c *StatsCommand) aggregate(metrics []*Metric) (map[string]*stat, error) {
 			Time:              api.Timestamp{Time: metric.time},
 			ID:                id,
 			MemoryLimit:       float64(*metric.app.Memory),
-			Volumes:           len(metric.app.Volumes),
 			CPU:               p.CPU,
 			Memory:            p.Memory,
 			ExternalNetworkRx: p.ExternalNetworkRx,
 			InternalNetworkRx: p.InternalNetworkRx,
 			ExternalNetworkTx: p.ExternalNetworkTx,
 			InternalNetworkTx: p.InternalNetworkTx,
-			Volume:            p.Volume,
 		}
 
 		switch metric.metricName {
@@ -278,10 +261,6 @@ func (c *StatsCommand) aggregate(metrics []*Metric) (map[string]*stat, error) {
 				break
 			}
 			s.InternalNetworkTx = metric.value
-		case "container_volume_usage_percentage":
-			if s.Volumes > 0 && metric.value > s.Volume {
-				s.Volume = metric.value
-			}
 		}
 		stats[id] = s
 		p = *s // merge next with previous one
@@ -305,7 +284,6 @@ func (c *StatsCommand) toMetricSlice(app *api.App, serviceId string, metrics api
 			}
 		}
 	}
-	sort.Sort(result)
 	return result
 }
 
@@ -320,24 +298,4 @@ func humanByte(size float64) string {
 	}
 
 	return fmt.Sprintf("%.3g %s", size, abbrs[i])
-}
-
-// HumanDuration returns a human-readable approximation of a duration
-func humanDuration(d time.Duration) string {
-	if seconds := int(d.Seconds()); seconds < 1 {
-		return "Less than a second"
-	} else if seconds < 60 {
-		return fmt.Sprintf("%d seconds", seconds)
-	} else if minutes := int(d.Minutes()); minutes == 1 {
-		return "About a minute"
-	} else if minutes < 60 {
-		return fmt.Sprintf("%d minutes", minutes)
-	} else if hours := int(d.Hours()); hours == 1 {
-		return "About an hour"
-	} else if hours < 48 {
-		return fmt.Sprintf("%d hours", hours)
-	} else {
-		return fmt.Sprintf("%d days", hours/24)
-	}
-
 }
