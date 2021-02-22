@@ -90,9 +90,6 @@ github.com/hashicorp/errwrap
 # github.com/hashicorp/go-multierror v0.0.0-20171204182908-b7773ae21874
 ## explicit
 github.com/hashicorp/go-multierror
-# github.com/hashicorp/go-version v0.0.0-20171129150820-4fe82ae3040f
-## explicit
-github.com/hashicorp/go-version
 # github.com/mattn/go-isatty v0.0.3
 ## explicit
 github.com/mattn/go-isatty

@@ -1,70 +1,61 @@
-.PHONY: default cross test test-local fmt  build shell bundle deploy clean
-# sloppy-cli makefile
-VERSION=$(shell cat ./version.txt)
-GIT_COMMIT=$(shell git rev-parse HEAD)
+PROJECT := $(shell go list -m)
+VERSION_NS := $(PROJECT)/command
 
-# Default docker image
-DOCKER_IMAGE := sloppy/go-cross:latest
+GIT_TAGCMD := $(shell git --no-pager tag --points-at HEAD)
+GIT_VERSION := $(if $(GIT_TAGCMD),$(GIT_TAGCMD),$(shell git rev-parse --short HEAD))
+GIT_COMMIT := $(shell git rev-parse HEAD)
+GIT_PRERELEASE := $(if $(shell git status --porcelain),dev)
 
-# env vars passed through directly to Docker's build scripts
-DOCKER_ENVS := \
-	-e GIT_COMMIT=$(GIT_COMMIT)
+GO_LDFLAGS := -X $(VERSION_NS).Version=$(GIT_VERSION) \
+-X $(VERSION_NS).GitCommit=$(GIT_COMMIT) \
+-X $(VERSION_NS).VersionPreRelease=$(GIT_PRERELEASE)
+GO_BUILD := go build -trimpath -ldflags "$(GO_LDFLAGS)"
+GO_PKG := ./cmd
 
+PLATFORMS := darwin/amd64 darwin/arm64 \
+linux/386 linux/amd64 linux/arm linux/arm64 linux/riscv64 \
+windows/386 windows/amd64 windows/arm
 
-DOCKER_MOUNT := -v "$(CURDIR):/go/src/github.com/sloppyio/cli" \
-								-w "/go/src/github.com/sloppyio/cli"
+.PHONY: help
+## help: prints this help message
+help:
+	@echo "Usage:"
+	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' |  sed -e 's/^/ /'
 
-DOCKER_FLAGS := docker run --rm -i -e SLOPPY_APITOKEN=$(SLOPPY_APITOKEN) $(DOCKER_ENVS) $(DOCKER_MOUNT)
-
-# if this session isn't interactive, then we don't want to allocate a
-# TTY, which would fail, but if it is interactive, we do want to attach
-# so that the user can send e.g. ^C through.
-INTERACTIVE := $(shell [ -t 0 ] && echo 1 || echo 0)
-ifeq ($(INTERACTIVE), 1)
-	DOCKER_FLAGS += -t
-endif
-
-DOCKER_RUN_DOCKER := $(DOCKER_FLAGS) "$(DOCKER_IMAGE)"
-
-default: cross
-
-local: scripts/make.sh build
-
-cross: bundle
-	$(DOCKER_RUN_DOCKER) scripts/make.sh cross release
-
-beta: bundle
-	$(DOCKER_RUN_DOCKER) scripts/make.sh cross beta
-
-test: bundle
-	$(DOCKER_RUN_DOCKER) scripts/test.sh
-
-update-vendor:
-	$(DOCKER_RUN_DOCKER) dep ensure -update github.com/sloppyio/sloppose
-
-test-local: bundle
-	scripts/make.sh test
-
-fmt:
-	$(DOCKER_RUN_DOCKER) gofmt -w .
-
-deploy: bundle
-	scripts/make.sh deploy release
-
-build:
-	docker build -t sloppy/go-cross:latest .
-
-shell:
-	$(DOCKER_RUN_DOCKER) bash
-
-bundle:
-	mkdir -p bundles
-
-coverage-show:
-	go tool cover -html=coverage.txt
-
-coverage-report:
-	goveralls -coverprofile=coverage.txt -service=travis-ci
-
+.PHONY: clean
+## clean: clean the working directory
 clean:
-	rm -rf bundles
+	$(info *** cleaning working directory)
+	@go clean -x
+	@rm -rf ./build
+
+.PHONY: test
+## test: run the test suite
+test: clean
+	$(info *** running tests)
+	@go test -v -race -cover -coverprofile coverage.out ./...
+
+.PHONY: build
+## build: build the application for the local target only
+build: clean build/$(shell go env GOOS)/$(shell go env GOARCH)
+
+## build/%: build for a specific os/arch, format like `go tool dist list`
+build/%: GO_OUT ?= $@ 
+build/%: export GOOS = $(firstword $(subst /, ,$*))
+build/%: export GOARCH = $(lastword $(subst /, ,$*))
+build/%: export CGO_ENABLED = 0
+build/%:
+	$(info *** building release for target $(GOOS)/$(GOARCH))
+	$(info $(GIT_VERSION))
+	@$(GO_BUILD) -o $(GO_OUT) $(GO_PKG)
+
+.PHONY: release
+## release: produce binaries for all targets
+release: clean $(foreach p, $(PLATFORMS), build/$(p))
+
+.PHONY: test-coverage
+## report-test: run the test suite and generate a coverage report
+test-coverage: test
+	@goveralls -coverprofile coverage.out
+
+default: help

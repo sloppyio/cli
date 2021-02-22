@@ -22,7 +22,6 @@ require (
 	github.com/gorilla/mux v1.6.1 // indirect
 	github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce // indirect
 	github.com/hashicorp/go-multierror v0.0.0-20171204182908-b7773ae21874 // indirect
-	github.com/hashicorp/go-version v0.0.0-20171129150820-4fe82ae3040f
 	github.com/mattn/go-isatty v0.0.3 // indirect
 	github.com/mattn/go-runewidth v0.0.2 // indirect
 	github.com/mitchellh/cli v0.0.0-20180117155440-518dc677a1e1

@@ -25,9 +25,6 @@ func TestVersionCommand(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: new(cli.MockUi)}
 	command.Version, command.VersionPreRelease, command.GitCommit = "0.0.1", "dev", "1b33f1"
 	c := &command.VersionCommand{
-		CheckVersion: func() (bool, string) {
-			return false, ""
-		},
 		UI: mockUI,
 	}
 

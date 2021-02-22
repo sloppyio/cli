@@ -1,23 +1,15 @@
-# OS generated files #
-######################
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 
-# private files #
-######################
-*.gz
-*.zip
-/temp/*
-/bundles
+# Test binary, built with `go test -c`
+*.test
 
-# Go test output
-/*.cover
-/coverage.txt
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
 
-# Go generate output
-*.syso
+# Build & CI working directories
+build/

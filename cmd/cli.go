@@ -1,4 +1,3 @@
-//go:generate goversioninfo -icon=./../resources/sloppy.ico -manifest=./../resources/sloppy.exe.manifest ./../versioninfo.json
 package main
 
 import (
@@ -45,20 +44,6 @@ func main() {
 		}
 	}
 
-	// Update mechanism
-	update := make(chan struct{}, 1)
-	if len(args) > 0 && args[0] == "version" {
-		fmt.Println(command.Version)
-		os.Exit(0)
-	} else {
-		go func() {
-			if ok, output := checkVersion(); ok {
-				fmt.Fprint(os.Stderr, output)
-			}
-			update <- struct{}{}
-		}()
-	}
-
 	client = api.NewClient()
 	client.SetUserAgent(userAgent())
 
@@ -86,7 +71,6 @@ func main() {
 		fatal("%s\nFor help, please visit https://kb.sloppy.io/features#cli-command-reference", err.Error())
 	}
 
-	<-update // wait for update goroutine
 	os.Exit(exitCode)
 }
 
