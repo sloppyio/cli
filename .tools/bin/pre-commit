@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source ".tools/lib/log.bash"
+
+installed() {
+  pre-commit -V &>/dev/null || return 1
+}
+
+install() {
+  if [[ -f ".git/hooks/pre-commit" ]]; then
+    log INFO "already installed!"
+  else
+    pre-commit install || return 1
+  fi
+}
+
+run_hooks() {
+  pre-commit run || return 1
+}
+
+entrypoint() {
+  local arg
+
+  arg=${*}
+
+  log HEAD "pre-commit git hook framework"
+
+  log INFO "verifying installation"
+  if ! installed; then
+    log ERROR "pre-commit is not installed!"
+    return 1
+  fi
+
+  case "${arg}" in
+  "setup")
+    log INFO "running pre-commit install:"
+    if ! install; then
+      log ERROR "hook installation failed"
+      return 1
+    fi
+    ;;
+  "run")
+    log INFO "running pre-commit hooks:"
+    if ! run_hooks; then
+      log ERROR "one or more hooks failed"
+      return 1
+    fi
+    ;;
+  *)
+    log ERROR "Usage: ${0} {setup|run}"
+    return 1
+    ;;
+  esac
+}
+
+entrypoint "${@}"

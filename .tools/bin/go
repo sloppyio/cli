@@ -1,0 +1,78 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source ".tools/lib/log.bash"
+
+installed() {
+  go version &>/dev/null || return 1
+}
+
+clean() {
+  local files
+  local answer
+  local build_dir
+
+  build_dir="${GO_OUT-./build}"
+
+  if [[ ! -d "${build_dir}" ]]; then
+    log INFO "workspace already clean (build dir not present)"
+    return 0
+  fi
+
+  readarray -d '' files < <(find "${build_dir}" -print0)
+
+  log WARN "files selected for removal: \n${files[*]}"
+  read -rp "continue [y/n]: " answer
+
+  case $answer in
+  [Yy])
+    rm -rfv "${files[@]}"
+    go clean
+    ;;
+  *)
+    return 1
+    ;;
+  esac
+}
+
+run_test() {
+  go test -race ./... || return 1
+}
+
+entrypoint() {
+  local arg
+
+  arg=${*}
+
+  log HEAD "Golang CLI"
+
+  log INFO "verifying installation"
+  if ! installed; then
+    log ERROR "go is not installed!"
+    return 1
+  fi
+
+  case "${arg}" in
+  "clean")
+    log INFO "removing build artifacts and leftovers"
+    if ! clean; then
+      log ERROR "cleanup failed!"
+      return 1
+    fi
+    ;;
+  "test")
+    log INFO "running test suite"
+    if ! run_test; then
+      log ERROR "package testing failed!"
+    fi
+    ;;
+  *)
+    log ERROR "Usage: ${0} {clean|test}"
+    return 1
+    ;;
+  esac
+
+}
+
+entrypoint "${@}"

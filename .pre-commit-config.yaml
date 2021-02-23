@@ -1,0 +1,23 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-json
+        # Exclude these files as they are incorrectly formatted on purpose
+        exclude: ^command/testdata/(testproject|letschat)_(invalidjson|variable).json
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude: ^vendor
+      - id: trailing-whitespace
+        exclude: ^vendor
+  - repo: local
+    hooks:
+      - id: lint
+        name: Project local linters
+        entry: make lint
+        language: system
+        pass_filenames: false
+        exclude: ^vendor

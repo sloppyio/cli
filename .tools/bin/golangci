@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source ".tools/lib/log.bash"
+
+installed() {
+  "${bin}" --version &>/dev/null || return 1
+}
+
+run() {
+  "${bin}" run || return 1
+}
+
+entrypoint() {
+  local arg
+  export cmd
+
+  arg="${*}"
+  bin="${arg:-golangci-lint}"
+
+  log HEAD "Fast linters Runner for Go"
+
+  log INFO "verifying installation"
+  if ! installed; then
+    log ERROR "golangci is not installed!"
+    return 1
+  fi
+
+  log INFO "running golang-ci lint:"
+  if ! run; then
+    log ERROR "lint verify or auto fix failed!"
+    return 1
+  fi
+}
+
+entrypoint "${@}"
