@@ -14,7 +14,7 @@ type Series map[string]DataPoints
 // DataPoints represents all values of a serie.
 type DataPoints []*DataPoint
 
-// DataPoint represents a value at specific time
+// DataPoint represents a value at specific time.
 type DataPoint struct {
 	X Timestamp `json:"x,omitempty"`
 	Y *float64  `json:"y,omitempty"`

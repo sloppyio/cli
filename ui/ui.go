@@ -14,7 +14,7 @@ import (
 )
 
 // UI is an interface for interacting with the terminal, or "interface" of
-// a CLI. Based on cli.Ui
+// a CLI. Based on cli.Ui.
 type UI interface {
 	cli.Ui
 
@@ -83,7 +83,7 @@ func (ui *DefaultUI) ErrorAPI(err error) {
 	ui.Error(errStr)
 }
 
-// ErrorNoFlagAfterArg is used for cli error related to wrong argument order
+// ErrorNoFlagAfterArg is used for cli error related to wrong argument order.
 func (ui *DefaultUI) ErrorNoFlagAfterArg(s []string) int {
 	for _, value := range s {
 		if strings.HasPrefix(value, "-") {
@@ -114,7 +114,7 @@ func (ui *DefaultUI) ErrorNotEnoughArgs(command, help string, n int) int {
 	return 1
 }
 
-// ErrorInvalidAppPath is used for cli error related to an invalid app path
+// ErrorInvalidAppPath is used for cli error related to an invalid app path.
 func (ui *DefaultUI) ErrorInvalidAppPath(arg string) int {
 	ui.Error(fmt.Sprintf("invalid application path '%s'. \n", arg))
 
@@ -167,25 +167,25 @@ func (ui *MockUI) ErrorNotEnoughArgs(command, help string, n int) int {
 	return realUI.ErrorNotEnoughArgs(command, help, n)
 }
 
-// Table is used for print a table
+// Table is used for print a table.
 func (ui *MockUI) Table(kind string, v interface{}) {
 	realUI := &DefaultUI{ui}
 	realUI.Table(kind, v)
 }
 
-// Raw is used for print json
+// Raw is used for print json.
 func (ui *MockUI) Raw(v interface{}) int {
 	realUI := &DefaultUI{ui}
 	return realUI.Raw(v)
 }
 
-// ErrorInvalidAppPath used for print error
+// ErrorInvalidAppPath used for print error.
 func (ui *MockUI) ErrorInvalidAppPath(arg string) int {
 	realUI := &DefaultUI{ui}
 	return realUI.ErrorInvalidAppPath(arg)
 }
 
-// ErrorNoFlagAfterArg used for print error
+// ErrorNoFlagAfterArg used for print error.
 func (ui *MockUI) ErrorNoFlagAfterArg(s []string) int {
 	realUI := &DefaultUI{ui}
 	return realUI.ErrorNoFlagAfterArg(s)

@@ -8,7 +8,7 @@ import (
 )
 
 // DockerLogoutCommand is a Command implementation that deletes the docker
-// credentials from sloppy.io
+// credentials from sloppy.io.
 type DockerLogoutCommand struct {
 	UI                  ui.UI
 	RegistryCredentials api.RegistryCredentialsCheckDeleter

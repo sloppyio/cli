@@ -192,27 +192,31 @@ func (p *project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 										return &yamlError{namespace: id, key: parameter, index: i, message: "key needs to be a string"}
 									}
 									switch key {
-										case "uri": {
+									case "uri":
+										{
 											value, ok := mapItem.Value.(string)
-											if (ok) {
+											if ok {
 												domain.URI = api.String(value)
 											}
 										}
-										case "redirectHttps": {
+									case "redirectHttps":
+										{
 											value, ok := mapItem.Value.(bool)
-											if (ok) {
-												domain.RedirectHttps = api.Bool(value)
+											if ok {
+												domain.RedirectHTTPS = api.Bool(value)
 											}
 										}
-										case "hstsHeader": {
+									case "hstsHeader":
+										{
 											value, ok := mapItem.Value.(bool)
-											if (ok) {
+											if ok {
 												domain.HstsHeader = api.Bool(value)
 											}
 										}
-										case "basicAuth": {
+									case "basicAuth":
+										{
 											value, ok := mapItem.Value.(string)
-											if (ok) {
+											if ok {
 												domain.BasicAuth = api.String(value)
 											}
 										}
@@ -254,7 +258,7 @@ func (p *project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 							fallthrough
 						case "port":
 							if port, ok := thirdLevel.Value.(int); ok {
-								if (app.PortMappings == nil) {
+								if app.PortMappings == nil {
 									app.PortMappings = []*api.PortMap{{Port: api.Int(port)}}
 								} else {
 									app.PortMappings[0].Port = api.Int(port)
@@ -264,7 +268,7 @@ func (p *project) UnmarshalYAML(unmarshal func(interface{}) error) error {
 							}
 						case "servicePort":
 							if port, ok := thirdLevel.Value.(int); ok {
-								if (app.PortMappings == nil) {
+								if app.PortMappings == nil {
 									app.PortMappings = []*api.PortMap{{ServicePort: api.Int(port)}}
 								} else {
 									app.PortMappings[0].ServicePort = api.Int(port)

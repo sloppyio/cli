@@ -114,7 +114,6 @@ func (c *StartCommand) Run(args []string) int {
 
 	project, _, err := c.Projects.Create(input)
 	if err != nil {
-
 		c.UI.ErrorAPI(err)
 		return 1
 	}

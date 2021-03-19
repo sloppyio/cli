@@ -47,5 +47,5 @@ func TestDockerLogoutCommand_notLoggedIn(t *testing.T) {
 	mockUI := &ui.MockUI{MockUi: &cli.MockUi{}}
 	c := &command.DockerLogoutCommand{UI: mockUI, RegistryCredentials: registryCredentials}
 
-	testCodeAndOutput(t, mockUI, c.Run([]string{}), 1, `Missing "SLOPPY_APITOKEN", please login by exporting your token https://admin.sloppy.io/account/tokens`)
+	testCodeAndOutput(t, mockUI, c.Run([]string{}), 1, `missing "SLOPPY_APITOKEN", please login by exporting your token https://admin.sloppy.io/account/tokens`)
 }

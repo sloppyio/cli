@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	envApiURL = "SLOPPY_API_URL"
+	envAPIURL = "SLOPPY_API_URL"
 	envToken  = "SLOPPY_APITOKEN"
 )
 
@@ -53,7 +53,7 @@ func main() {
 		fatal("Missing %s, please login by exporting your token https://admin.sloppy.io/account/tokens", envToken)
 	}
 
-	if apiURL, ok := os.LookupEnv(envApiURL); ok {
+	if apiURL, ok := os.LookupEnv(envAPIURL); ok {
 		err := client.SetBaseURL(apiURL)
 		if err != nil {
 			fatal("Error setting base url to %q", apiURL)

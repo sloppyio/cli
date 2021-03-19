@@ -17,7 +17,7 @@ type LogEntry struct {
 	Log       *string    `json:"body,omitempty"`
 }
 
-// String prints a log entry
+// String prints a log entry.
 func (e *LogEntry) String() string {
 	return fmt.Sprintf("%s %s %s %s %s",
 		e.CreatedAt.Format("2006-01-02 15:04:05"), *e.Project, *e.Service, *e.App, *e.Log)

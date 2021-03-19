@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	// The git commit that was compiled. This will be filled in by the compiler.
+	// GitCommit is the commit hash of the current build.
 	GitCommit string
 
 	// Version number that is being run at the moment.

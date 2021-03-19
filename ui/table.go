@@ -22,7 +22,6 @@ func tableStart(w io.Writer, services []*api.Service) {
 		totalMemory := 0
 		for _, app := range service.Apps {
 			totalMemory += *app.Memory * *app.Instances
-
 		}
 
 		table.Append([]string{
@@ -189,7 +188,7 @@ func listApp(w io.Writer, app *api.App) {
 		fmt.Fprint(&buf, "Ports:")
 	}
 	for _, value := range app.PortMappings {
-		if (value.ServicePort == nil) {
+		if value.ServicePort == nil {
 			fmt.Fprintf(&buf, "\t\t %d\n", *value.Port)
 		} else {
 			fmt.Fprintf(&buf, "\t\t %d:%d\n", *value.ServicePort, *value.Port)
@@ -244,7 +243,7 @@ func countMatch(slice []string, pattern string) int {
 	return n
 }
 
-// Null pointer returns a placeholder
+// Null pointer returns a placeholder.
 func placeholder(v *string, placeholder string) string {
 	if v == nil {
 		return placeholder

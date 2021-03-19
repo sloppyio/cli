@@ -95,7 +95,6 @@ func TestChangeCommand_updateProjecIncorrectOrder(t *testing.T) {
 	}
 
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "incorrect order of arguments")
-
 }
 
 func TestChangeCommand_updateProjectBackwardCompatibility(t *testing.T) {
