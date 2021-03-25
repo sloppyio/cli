@@ -10,7 +10,7 @@ GIT_VERSION := $(if $(GIT_TAGCMD),$(GIT_TAGCMD),$(shell git rev-parse --short HE
 GIT_COMMIT := $(shell git rev-parse HEAD)
 GIT_PRERELEASE := $(if $(shell git status --porcelain),dev)
 
-GO_LDFLAGS := -X $(VERSION_NS).Version=$(GIT_VERSION) \
+GO_LDFLAGS := -s -w -X $(VERSION_NS).Version=$(GIT_VERSION) \
 -X $(VERSION_NS).GitCommit=$(GIT_COMMIT) \
 -X $(VERSION_NS).VersionPreRelease=$(GIT_PRERELEASE)
 GO_BUILD := go build -trimpath -ldflags "$(GO_LDFLAGS)"
@@ -61,18 +61,22 @@ lint: $(GOLANGCI_LINT)
 pre-commit:
 	@.tools/bin/pre-commit run
 
+.PHONY: pre-commit-ci
+## pre-commit-ci: run all pre-commit hooks
+pre-commit-ci:
+	@.tools/bin/pre-commit run-ci
+
 .PHONY: build
 ## build: build the application for the local target only
 build: clean build/$(shell go env GOOS)/$(shell go env GOARCH)
 
 ## build/%: build for a specific os/arch, format like `go tool dist list`
-build/%: GO_OUT ?= $@
 build/%: export GOOS = $(firstword $(subst /, ,$*))
 build/%: export GOARCH = $(lastword $(subst /, ,$*))
 build/%: export CGO_ENABLED = 0
 build/%:
 	$(info *** building release for target $(GOOS)/$(GOARCH))
-	@$(GO_BUILD) -o $(GO_OUT) $(GO_PKG)
+	@$(GO_BUILD) -o build/sloppy-$(GOOS)-$(GOARCH) $(GO_PKG)
 
 .PHONY: release
 ## release: build binaries for all targets

@@ -20,6 +20,16 @@ run_hooks() {
   pre-commit run || return 1
 }
 
+run_hooks_ci() {
+  local from_ref
+  local to_ref
+
+  from_ref="${PRE_COMMIT_FROM_REF}"
+  to_ref="${PRE_COMMIT_TO_REF}"
+
+  pre-commit run --from-ref "${from_ref}" --to-ref "${to_ref}"
+}
+
 entrypoint() {
   local arg
 
@@ -44,6 +54,13 @@ entrypoint() {
   "run")
     log INFO "running pre-commit hooks:"
     if ! run_hooks; then
+      log ERROR "one or more hooks failed"
+      return 1
+    fi
+    ;;
+  "run-ci")
+    log INFO "running pre-commit hooks for MR context:"
+    if ! run_hooks_ci; then
       log ERROR "one or more hooks failed"
       return 1
     fi
