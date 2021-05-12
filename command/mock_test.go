@@ -37,7 +37,7 @@ func NewErrorResponse(statusCode int, message, reason string) *api.ErrorResponse
 	}
 }
 
-// MockProjectsEndpoint
+// MockProjectsEndpoint.
 type mockProjectsEndpoint struct {
 	m           sync.RWMutex
 	wantMessage string
@@ -140,7 +140,7 @@ func (m *mockProjectsEndpoint) GetLogs(project string, limit int, fromDate strin
 	return logs, errors
 }
 
-// mockServicesEndpoint
+// mockServicesEndpoint.
 type mockServicesEndpoint struct {
 	m           sync.RWMutex
 	wantMessage string
@@ -202,7 +202,7 @@ func (m *mockServicesEndpoint) GetLogs(project, service string, limit int, fromD
 	return logs, errors
 }
 
-// mockAppsEndpoint
+// mockAppsEndpoint.
 type mockAppsEndpoint struct {
 	m           sync.RWMutex
 	wantMessage string
@@ -403,7 +403,7 @@ var mockProject = &api.Project{
 	},
 }
 
-// mockAppsEndpoint
+// mockAppsEndpoint.
 type mockRegistryCredentialsEndpoint struct {
 	wantMessage string
 }
@@ -425,7 +425,6 @@ func (m *mockRegistryCredentialsEndpoint) Upload(r io.Reader) (*api.StatusRespon
 }
 
 func (m *mockRegistryCredentialsEndpoint) Delete() (*api.StatusResponse, *http.Response, error) {
-
 	return &api.StatusResponse{
 		Status:  "success",
 		Message: "Docker credentials removed",
@@ -433,7 +432,6 @@ func (m *mockRegistryCredentialsEndpoint) Delete() (*api.StatusResponse, *http.R
 }
 
 func (m *mockRegistryCredentialsEndpoint) Check() (*api.StatusResponse, *http.Response, error) {
-
 	if m.wantMessage == api.ErrMissingAccessToken.Error() {
 		return nil, nil, api.ErrMissingAccessToken
 	} else if m.wantMessage != "" {

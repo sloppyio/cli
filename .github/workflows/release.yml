@@ -1,0 +1,30 @@
+name: "Release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  publish:
+    runs-on: "ubuntu-20.04"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+        with:
+          fetch-depth: 0
+
+      - name: "Prepare"
+        uses: "asdf-vm/actions/install@v1"
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: "Build release"
+        run: |
+          make release
+
+      - name: "Publish release"
+        uses: "marvinpinto/action-automatic-releases@v1.2.0"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          files: |
+            build/*

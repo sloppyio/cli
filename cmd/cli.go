@@ -1,4 +1,3 @@
-//go:generate goversioninfo -icon=./../resources/sloppy.ico -manifest=./../resources/sloppy.exe.manifest ./../versioninfo.json
 package main
 
 import (
@@ -15,7 +14,7 @@ import (
 )
 
 const (
-	envApiURL = "SLOPPY_API_URL"
+	envAPIURL = "SLOPPY_API_URL"
 	envToken  = "SLOPPY_APITOKEN"
 )
 
@@ -45,20 +44,6 @@ func main() {
 		}
 	}
 
-	// Update mechanism
-	update := make(chan struct{}, 1)
-	if len(args) > 0 && args[0] == "version" {
-		fmt.Println(command.Version)
-		os.Exit(0)
-	} else {
-		go func() {
-			if ok, output := checkVersion(); ok {
-				fmt.Fprint(os.Stderr, output)
-			}
-			update <- struct{}{}
-		}()
-	}
-
 	client = api.NewClient()
 	client.SetUserAgent(userAgent())
 
@@ -68,7 +53,7 @@ func main() {
 		fatal("Missing %s, please login by exporting your token https://admin.sloppy.io/account/tokens", envToken)
 	}
 
-	if apiURL, ok := os.LookupEnv(envApiURL); ok {
+	if apiURL, ok := os.LookupEnv(envAPIURL); ok {
 		err := client.SetBaseURL(apiURL)
 		if err != nil {
 			fatal("Error setting base url to %q", apiURL)
@@ -86,7 +71,6 @@ func main() {
 		fatal("%s\nFor help, please visit https://kb.sloppy.io/features#cli-command-reference", err.Error())
 	}
 
-	<-update // wait for update goroutine
 	os.Exit(exitCode)
 }
 

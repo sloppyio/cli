@@ -227,7 +227,7 @@ func TestProjectsDelete(t *testing.T) {
 func TestProjectsLogs_notFound(t *testing.T) {
 	helper := test.NewHelper(t)
 	handler := helper.NewHTTPNotFoundHandler(
-		[]byte(`{"status":"error","message":"something happend"}`),
+		[]byte(`{"status":"error","message":"something happened"}`),
 		"/apps/letschat/logs")
 	server := helper.NewAPIServer(handler)
 	defer server.Close()
@@ -334,7 +334,7 @@ func TestProjectsServerErrors(t *testing.T) {
 		testMethod(t, r, want.method)
 		want.m.Unlock()
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, `{"status": "error", "message": "something happend"}`)
+		fmt.Fprint(w, `{"status": "error", "message": "something happened"}`)
 	}
 	server := helper.NewAPIServer(handler)
 	defer server.Close()
@@ -350,7 +350,7 @@ func TestProjectsServerErrors(t *testing.T) {
 		{
 			uri:    "/apps/",
 			method: "GET",
-			err:    newErrorResponse(nil, "something happend", ""),
+			err:    newErrorResponse(nil, "something happened", ""),
 			call: func() (*http.Response, error) {
 				_, resp, err := client.Projects.List()
 				return resp, err
@@ -359,7 +359,7 @@ func TestProjectsServerErrors(t *testing.T) {
 		{
 			uri:    "/apps/letschat",
 			method: "GET",
-			err:    newErrorResponse(nil, "something happend", ""),
+			err:    newErrorResponse(nil, "something happened", ""),
 			call: func() (*http.Response, error) {
 				_, resp, err := client.Projects.Get("letschat")
 				return resp, err
@@ -368,7 +368,7 @@ func TestProjectsServerErrors(t *testing.T) {
 		{
 			uri:    "/apps/",
 			method: "POST",
-			err:    newErrorResponse(nil, "something happend", ""),
+			err:    newErrorResponse(nil, "something happened", ""),
 			call: func() (*http.Response, error) {
 				_, resp, err := client.Projects.Create(testProject)
 				return resp, err
@@ -377,7 +377,7 @@ func TestProjectsServerErrors(t *testing.T) {
 		{
 			uri:    "/apps/letschat",
 			method: "PUT",
-			err:    newErrorResponse(nil, "something happend", ""),
+			err:    newErrorResponse(nil, "something happened", ""),
 			call: func() (*http.Response, error) {
 				_, resp, err := client.Projects.Update("letschat", testProject, false)
 				return resp, err
@@ -386,7 +386,7 @@ func TestProjectsServerErrors(t *testing.T) {
 		{
 			uri:    "/apps/letschat",
 			method: "DELETE",
-			err:    newErrorResponse(nil, "something happend", ""),
+			err:    newErrorResponse(nil, "something happened", ""),
 			call: func() (*http.Response, error) {
 				_, resp, err := client.Projects.Delete("letschat", true)
 				return resp, err

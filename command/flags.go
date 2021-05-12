@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// StringMap is used to handle multiple flag
+// StringMap is used to handle multiple flag.
 type StringMap map[string]string
 
 func (s *StringMap) String() string {

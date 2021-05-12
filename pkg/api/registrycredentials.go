@@ -5,14 +5,13 @@ import (
 	"net/http"
 )
 
-// RegistryCredentialsEndpoint handles communication with the registry credentails related methods of the sloppy API.
+// RegistryCredentialsEndpoint handles communication with the registry credentials related methods of the sloppy API.
 type RegistryCredentialsEndpoint struct {
 	client *Client
 }
 
 // Check checks if docker credentials exist.
 func (r *RegistryCredentialsEndpoint) Check() (*StatusResponse, *http.Response, error) {
-
 	req, err := r.client.NewRequest("GET", "registrycredentials", nil)
 	if err != nil {
 		return nil, nil, err
@@ -42,7 +41,6 @@ func (r *RegistryCredentialsEndpoint) Delete() (*StatusResponse, *http.Response,
 
 // Upload uploads docker credentials.
 func (r *RegistryCredentialsEndpoint) Upload(reader io.Reader) (*StatusResponse, *http.Response, error) {
-
 	req, err := r.client.NewRequest("PUT", "registrycredentials", reader)
 	if err != nil {
 		return nil, nil, err

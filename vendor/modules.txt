@@ -1,0 +1,155 @@
+# github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78
+## explicit
+github.com/Azure/go-ansiterm
+github.com/Azure/go-ansiterm/winterm
+# github.com/Microsoft/go-winio v0.4.7
+## explicit
+github.com/Microsoft/go-winio
+# github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5
+## explicit
+github.com/Nvveen/Gotty
+# github.com/armon/go-radix v0.0.0-20170727155443-1fca145dffbc
+## explicit
+github.com/armon/go-radix
+# github.com/bgentry/speakeasy v0.1.0
+## explicit
+github.com/bgentry/speakeasy
+# github.com/docker/cli v0.0.0-20180208160652-a9ecf823ff3e
+## explicit
+github.com/docker/cli/cli/config/configfile
+github.com/docker/cli/cli/config/credentials
+github.com/docker/cli/opts
+# github.com/docker/distribution v2.6.0-rc.1.0.20180207001120-d707ea24281f+incompatible
+## explicit
+github.com/docker/distribution
+github.com/docker/distribution/digestset
+github.com/docker/distribution/reference
+github.com/docker/distribution/registry/api/errcode
+github.com/docker/distribution/registry/api/v2
+github.com/docker/distribution/registry/client
+github.com/docker/distribution/registry/client/auth
+github.com/docker/distribution/registry/client/auth/challenge
+github.com/docker/distribution/registry/client/transport
+github.com/docker/distribution/registry/storage/cache
+github.com/docker/distribution/registry/storage/cache/memory
+# github.com/docker/docker v17.12.0-ce-rc1.0.20180209023802-afbc9c4cfc5d+incompatible
+## explicit
+github.com/docker/docker/api/types
+github.com/docker/docker/api/types/blkiodev
+github.com/docker/docker/api/types/container
+github.com/docker/docker/api/types/filters
+github.com/docker/docker/api/types/mount
+github.com/docker/docker/api/types/network
+github.com/docker/docker/api/types/registry
+github.com/docker/docker/api/types/strslice
+github.com/docker/docker/api/types/swarm
+github.com/docker/docker/api/types/swarm/runtime
+github.com/docker/docker/api/types/versions
+github.com/docker/docker/errdefs
+github.com/docker/docker/pkg/ioutils
+github.com/docker/docker/pkg/jsonmessage
+github.com/docker/docker/pkg/longpath
+github.com/docker/docker/pkg/stringid
+github.com/docker/docker/pkg/tarsum
+github.com/docker/docker/pkg/term
+github.com/docker/docker/pkg/term/windows
+github.com/docker/docker/registry
+github.com/docker/docker/registry/resumable
+# github.com/docker/docker-credential-helpers v0.6.0
+## explicit
+github.com/docker/docker-credential-helpers/client
+github.com/docker/docker-credential-helpers/credentials
+github.com/docker/docker-credential-helpers/pass
+# github.com/docker/go-connections v0.3.0
+## explicit
+github.com/docker/go-connections/nat
+github.com/docker/go-connections/sockets
+github.com/docker/go-connections/tlsconfig
+# github.com/docker/go-units v0.3.2
+## explicit
+github.com/docker/go-units
+# github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7
+## explicit
+# github.com/ghodss/yaml v1.0.0
+## explicit
+github.com/ghodss/yaml
+# github.com/gogo/protobuf v1.0.0
+## explicit
+github.com/gogo/protobuf/proto
+# github.com/google/go-cmp v0.5.4
+## explicit
+# github.com/gorilla/context v0.0.0-20160226214623-1ea25387ff6f
+## explicit
+github.com/gorilla/context
+# github.com/gorilla/mux v1.6.1
+## explicit
+github.com/gorilla/mux
+# github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
+## explicit
+github.com/hashicorp/errwrap
+# github.com/hashicorp/go-multierror v0.0.0-20171204182908-b7773ae21874
+## explicit
+github.com/hashicorp/go-multierror
+# github.com/mattn/go-isatty v0.0.3
+## explicit
+github.com/mattn/go-isatty
+# github.com/mattn/go-runewidth v0.0.2
+## explicit
+github.com/mattn/go-runewidth
+# github.com/mitchellh/cli v0.0.0-20180117155440-518dc677a1e1
+## explicit
+github.com/mitchellh/cli
+# github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
+## explicit
+github.com/mohae/deepcopy
+# github.com/olekukonko/tablewriter v0.0.0-20180130162743-b8a9be070da4
+## explicit
+github.com/olekukonko/tablewriter
+# github.com/onsi/ginkgo v1.15.0
+## explicit
+# github.com/onsi/gomega v1.10.5
+## explicit
+# github.com/opencontainers/go-digest v1.0.0-rc1
+## explicit
+github.com/opencontainers/go-digest
+# github.com/opencontainers/image-spec v1.0.1
+## explicit
+github.com/opencontainers/image-spec/specs-go
+github.com/opencontainers/image-spec/specs-go/v1
+# github.com/pkg/errors v0.8.0
+## explicit
+github.com/pkg/errors
+# github.com/posener/complete v0.0.0-20171104095702-dc2bc5a81acc
+## explicit
+github.com/posener/complete
+github.com/posener/complete/cmd
+github.com/posener/complete/cmd/install
+github.com/posener/complete/match
+# github.com/sirupsen/logrus v1.0.3
+## explicit
+github.com/sirupsen/logrus
+# github.com/sloppyio/sloppose v0.1.6
+## explicit
+github.com/sloppyio/sloppose/pkg/config
+github.com/sloppyio/sloppose/pkg/converter
+# github.com/stretchr/testify v1.7.0
+## explicit
+# golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+golang.org/x/crypto/ssh/terminal
+# golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb
+golang.org/x/net/context
+golang.org/x/net/internal/socks
+golang.org/x/net/proxy
+# golang.org/x/sys v0.0.0-20210112080510-489259a85091
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# gopkg.in/airbrake/gobrake.v2 v2.0.9
+## explicit
+# gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
+## explicit
+# gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2
+## explicit
+# gopkg.in/yaml.v2 v2.3.0
+## explicit
+gopkg.in/yaml.v2

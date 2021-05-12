@@ -92,7 +92,7 @@ func TestDockerLoginCommand_noDockerConfig(t *testing.T) {
 	testCodeAndOutput(t, mockUI, c.Run(args), 1, "doesn't exist.")
 }
 
-// createTempFile creates a dummy file for testing purpose
+// createTempFile creates a dummy file for testing purpose.
 func createTempFile(t *testing.T, name, auth string) *os.File {
 	file, err := ioutil.TempFile(os.TempDir(), name)
 	if err != nil {

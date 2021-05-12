@@ -1,9 +1,9 @@
 package dockerconfig
 
 import (
-	"testing"
 	"bytes"
 	"io/ioutil"
+	"testing"
 )
 
 func TestTransform(t *testing.T) {

@@ -129,7 +129,6 @@ func (p *ProjectsEndpoint) Delete(name string, force bool) (*StatusResponse, *ht
 
 // GetLogs returns logs for all apps included in a specific project.
 func (p *ProjectsEndpoint) GetLogs(name string, limit int, fromDate string, toDate string) (<-chan LogEntry, <-chan error) {
-
 	u := fmt.Sprintf("apps/%s/logs", name)
 
 	return RetrieveLogs(p.client, u, limit, fromDate, toDate)

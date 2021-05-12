@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	// The git commit that was compiled. This will be filled in by the compiler.
+	// GitCommit is the commit hash of the current build.
 	GitCommit string
 
 	// Version number that is being run at the moment.
@@ -22,8 +22,7 @@ var (
 
 // VersionCommand is a Command implementation that prints the version.
 type VersionCommand struct {
-	CheckVersion func() (bool, string)
-	UI           ui.UI
+	UI ui.UI
 }
 
 // Help should return long-form help text.
@@ -46,9 +45,6 @@ func (c *VersionCommand) Run(_ []string) int {
 	}
 
 	c.UI.Output(versionString.String())
-	if ok, output := c.CheckVersion(); ok {
-		c.UI.Output(output)
-	}
 
 	return 0
 }

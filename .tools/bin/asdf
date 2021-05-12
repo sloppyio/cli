@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source ".tools/lib/log.bash"
+
+installed() {
+  asdf info &>/dev/null || return 1
+}
+
+install_plugins() {
+  while read -r line _; do
+    if ! asdf plugin list | grep "$line" &>/dev/null; then
+      asdf plugin add "$line"
+    fi
+  done <.tool-versions
+}
+
+install_tools() {
+  asdf install || return 1
+}
+
+entrypoint() {
+  local arg
+
+  arg=${*}
+
+  log HEAD "asdf version manager"
+
+  log INFO "verifying installation"
+  if ! installed; then
+    log ERROR "asdf is not installed but required: https://asdf-vm.com"
+    return 1
+  fi
+
+  case "${arg}" in
+  "setup")
+    log INFO "installing required plugins"
+    if ! install_plugins; then
+      log ERROR "plugin installation failed"
+      return 1
+    fi
+
+    log INFO "running asdf install:"
+    if ! install_tools; then
+      log ERROR "tools installation failed"
+      return 1
+    fi
+    ;;
+  *)
+    log ERROR "Usage: ${0} {setup}"
+    return 1
+    ;;
+  esac
+}
+
+entrypoint "${@}"

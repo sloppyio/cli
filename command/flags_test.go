@@ -27,5 +27,4 @@ func TestStringMap(t *testing.T) {
 	if !reflect.DeepEqual(want, m) {
 		t.Errorf("stringMap Set: %v, want %v", m, want)
 	}
-
 }

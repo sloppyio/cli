@@ -1,0 +1,19 @@
+linters:
+  disable-all: true
+  enable:
+    - depguard
+    - dogsled
+    - godot
+    - gofmt
+    - goimports
+    - golint
+    - gosec
+    - misspell
+    - nakedret
+    - nolintlint
+    - rowserrcheck
+    - scopelint
+    - stylecheck
+    - typecheck
+    - varcheck
+    - whitespace

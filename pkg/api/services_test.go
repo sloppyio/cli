@@ -126,7 +126,7 @@ func TestServiceServerErrors(t *testing.T) {
 	helper := test.NewHelper(t)
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, `{"status": "error", "message": "something happend"}`)
+		fmt.Fprint(w, `{"status": "error", "message": "something happened"}`)
 	}
 	server := helper.NewAPIServer(handler)
 	defer server.Close()
@@ -142,7 +142,7 @@ func TestServiceServerErrors(t *testing.T) {
 		{
 			uri:    "/apps/letschat/",
 			method: "GET",
-			err:    newErrorResponse(nil, "something happend", ""),
+			err:    newErrorResponse(nil, "something happened", ""),
 			call: func() (*http.Response, error) {
 				_, resp, err := client.Services.List("letschat")
 				return resp, err
@@ -151,7 +151,7 @@ func TestServiceServerErrors(t *testing.T) {
 		{
 			uri:    "/apps/letschat/services/frontend",
 			method: "GET",
-			err:    newErrorResponse(nil, "something happend", ""),
+			err:    newErrorResponse(nil, "something happened", ""),
 			call: func() (*http.Response, error) {
 				_, resp, err := client.Services.Get("letschat", "frontend")
 				return resp, err
@@ -160,7 +160,7 @@ func TestServiceServerErrors(t *testing.T) {
 		{
 			uri:    "/apps/letschat/services/frontend",
 			method: "DELETE",
-			err:    newErrorResponse(nil, "something happend", ""),
+			err:    newErrorResponse(nil, "something happened", ""),
 			call: func() (*http.Response, error) {
 				_, resp, err := client.Services.Delete("letschat", "frontend", true)
 				return resp, err

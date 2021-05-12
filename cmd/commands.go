@@ -96,8 +96,7 @@ func init() {
 		},
 		"version": func() (cli.Command, error) {
 			return &command.VersionCommand{
-				CheckVersion: checkVersion,
-				UI:           defaultUI,
+				UI: defaultUI,
 			}, nil
 		},
 	}

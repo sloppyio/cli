@@ -17,7 +17,7 @@ func TestListApp_completeApp(t *testing.T) {
 		},
 		Command: api.String("serve"),
 		PortMappings: []*api.PortMap{
-			&api.PortMap{
+			{
 				Port: api.Int(80),
 			},
 		},
@@ -34,11 +34,11 @@ func TestListApp_completeApp(t *testing.T) {
 			"LETSCHAT_DB_USER":     "user",
 		},
 		Volumes: []*api.Volume{
-			&api.Volume{
+			{
 				Path: api.String("/var/data"),
 				Size: api.String("8GB"),
 			},
-			&api.Volume{
+			{
 				Path: api.String("/var/db"),
 				Size: api.String("16GB"),
 			},

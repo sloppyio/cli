@@ -116,7 +116,7 @@ func (c *StatsCommand) Synopsis() string {
 	return "Display metrics of a running app"
 }
 
-// Stat represents a container's stats
+// Stat represents a container's stats.
 type stat struct {
 	App               string
 	Service           string
@@ -268,7 +268,7 @@ func (c *StatsCommand) aggregate(metrics []*Metric) (map[string]*stat, error) {
 	return stats, nil
 }
 
-func (c *StatsCommand) toMetricSlice(app *api.App, serviceId string, metrics api.Metrics) Metrics {
+func (c *StatsCommand) toMetricSlice(app *api.App, serviceID string, metrics api.Metrics) Metrics {
 	result := make(Metrics, 0)
 	for metricName, series := range metrics {
 		for seriesName, dataPoints := range series {
@@ -276,7 +276,7 @@ func (c *StatsCommand) toMetricSlice(app *api.App, serviceId string, metrics api
 				result = append(result, &Metric{
 					app:        app,
 					metricName: metricName,
-					service:    serviceId,
+					service:    serviceID,
 					seriesName: seriesName,
 					time:       dataPoint.X.Time,
 					value:      *dataPoint.Y,

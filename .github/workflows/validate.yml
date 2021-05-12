@@ -1,0 +1,48 @@
+name: "Validate"
+
+on:
+  - "push"
+
+jobs:
+  lint:
+    runs-on: "ubuntu-20.04"
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v2"
+        with:
+          fetch-depth: 0
+
+      - name: "Cache dependencies"
+        id: cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.asdf
+          key: ${{ runner.os }}-${{ hashFiles('**/.tool-versions') }}
+
+      - name: "Prepare"
+        uses: "asdf-vm/actions/install@v1"
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      - name: "Prepare"
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          ASDF_DIR=$HOME/.asdf
+          echo "ASDF_DIR=$ASDF_DIR" >> $GITHUB_ENV
+          echo "ASDF_DATA_DIR=$ASDF_DIR" >> $GITHUB_ENV
+          echo "$ASDF_DIR/bin" >> $GITHUB_PATH
+          echo "$ASDF_DIR/shims" >> $GITHUB_PATH
+
+      - name: "Get pull request context"
+        id: get_pr
+        uses: 8BitJonny/gh-get-current-pr@1.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          filterOutClosed: true
+
+      - name: "Check"
+        run: |
+          export PR='${{ steps.get_pr.outputs.pr }}'
+          export PRE_COMMIT_FROM_REF=$GITHUB_SHA
+          export PRE_COMMIT_TO_REF=$(echo "${PR}" | jq '.base.sha' | tr -d '"')
+          make pre-commit-ci
+          make test

@@ -43,7 +43,7 @@ func TestErrorMissingAccessToken(t *testing.T) {
 
 	mockUI.ErrorAPI(api.ErrMissingAccessToken)
 	errOut := mockUI.ErrorWriter.String()
-	if !strings.Contains(errOut, `Missing "SLOPPY_APITOKEN"`) {
+	if !strings.Contains(errOut, `missing "SLOPPY_APITOKEN"`) {
 		t.Errorf("ErrorAPI(missingToken) = %s, want %s", errOut, api.ErrMissingAccessToken.Error())
 	}
 }

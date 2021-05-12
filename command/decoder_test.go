@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"gopkg.in/yaml.v2"
 	"github.com/sloppyio/cli/pkg/api"
+	"gopkg.in/yaml.v2"
 )
 
 // FIXME this is basically obsolete when the underlying encoding packages (yml & json) are used.
@@ -231,7 +231,7 @@ func TestDecodeYAML(t *testing.T) {
 						Command:   api.String("mysqld"),
 						PortMappings: []*api.PortMap{
 							{
-								Port: api.Int(3306),
+								Port:        api.Int(3306),
 								ServicePort: api.Int(32005),
 							},
 						},
@@ -315,10 +315,10 @@ func TestDecodeYAML_LbYAML(t *testing.T) {
 						ID:    api.String("apache"),
 						Image: api.String("wordpress:4.2"),
 						Domain: &api.Domain{
-							URI: api.String("superblog.volks.cloud"),
-							RedirectHttps: api.Bool(true),
-							HstsHeader: api.Bool(true),
-							BasicAuth: api.String("basic-auth"),
+							URI:           api.String("superblog.volks.cloud"),
+							RedirectHTTPS: api.Bool(true),
+							HstsHeader:    api.Bool(true),
+							BasicAuth:     api.String("basic-auth"),
 						},
 					},
 				},

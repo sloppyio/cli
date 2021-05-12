@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source ".tools/lib/log.bash"
+
+installed() {
+  "${bin}" -h &>/dev/null || return 1
+}
+
+run() {
+  "${bin}" -race || return 1
+}
+
+entrypoint() {
+  local arg
+  export cmd
+
+  arg="${*}"
+  bin="${arg:-goveralls}"
+
+  log HEAD "Coveralls.io code coverage tracking"
+
+  log INFO "verifying installation"
+  if ! installed; then
+    log ERROR "goveralls is not installed!"
+    return 1
+  fi
+
+  log INFO "running test suite and generating report:"
+  if ! run; then
+    log ERROR "package testing failed!"
+    return 1
+  fi
+}
+
+entrypoint "${@}"

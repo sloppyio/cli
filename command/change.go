@@ -86,7 +86,7 @@ func (c *ChangeCommand) Run(args []string) int {
 	return 1
 }
 
-// Update an application
+// Update an application.
 func (c *ChangeCommand) updateApp(args []string) int {
 	var memory, instances int
 	var image, domain string
@@ -152,7 +152,7 @@ func (c *ChangeCommand) updateApp(args []string) int {
 	return 0
 }
 
-// Updates an entire project
+// Updates an entire project.
 func (c *ChangeCommand) updateProject(args []string) int {
 	var vars StringMap
 	var force bool

@@ -1,0 +1,5 @@
+golang 1.16.4
+python 3.9.2
+pre-commit 2.11.1
+shellcheck 0.7.1
+shfmt 3.2.2
