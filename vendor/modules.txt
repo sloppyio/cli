@@ -105,10 +105,6 @@ github.com/mohae/deepcopy
 # github.com/olekukonko/tablewriter v0.0.0-20180130162743-b8a9be070da4
 ## explicit
 github.com/olekukonko/tablewriter
-# github.com/onsi/ginkgo v1.15.0
-## explicit
-# github.com/onsi/gomega v1.10.5
-## explicit
 # github.com/opencontainers/go-digest v1.0.0-rc1
 ## explicit
 github.com/opencontainers/go-digest
@@ -137,10 +133,12 @@ github.com/sloppyio/sloppose/pkg/converter
 # golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 golang.org/x/crypto/ssh/terminal
 # golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb
+## explicit
 golang.org/x/net/context
 golang.org/x/net/internal/socks
 golang.org/x/net/proxy
 # golang.org/x/sys v0.0.0-20210112080510-489259a85091
+## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows

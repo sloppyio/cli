@@ -1,6 +1,6 @@
 module github.com/sloppyio/cli
 
-go 1.15
+go 1.16
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
@@ -27,8 +27,6 @@ require (
 	github.com/mitchellh/cli v0.0.0-20180117155440-518dc677a1e1
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826
 	github.com/olekukonko/tablewriter v0.0.0-20180130162743-b8a9be070da4
-	github.com/onsi/ginkgo v1.15.0 // indirect
-	github.com/onsi/gomega v1.10.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/pkg/errors v0.8.0 // indirect
@@ -36,6 +34,8 @@ require (
 	github.com/sirupsen/logrus v1.0.3 // indirect
 	github.com/sloppyio/sloppose v0.1.6
 	github.com/stretchr/testify v1.7.0 // indirect
+	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb // indirect
+	golang.org/x/sys v0.0.0-20210112080510-489259a85091 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
