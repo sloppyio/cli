@@ -10,7 +10,7 @@ require (
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/docker/cli v0.0.0-20180208160652-a9ecf823ff3e
 	github.com/docker/distribution v2.6.0-rc.1.0.20180207001120-d707ea24281f+incompatible // indirect
-	github.com/docker/docker v17.12.0-ce-rc1.0.20180209023802-afbc9c4cfc5d+incompatible // indirect
+	github.com/docker/docker v17.12.0-ce-rc1.0.20180209023802-afbc9c4cfc5d+incompatible
 	github.com/docker/docker-credential-helpers v0.6.0 // indirect
 	github.com/docker/go-connections v0.3.0 // indirect
 	github.com/docker/go-units v0.3.2 // indirect
@@ -20,6 +20,7 @@ require (
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/gorilla/context v0.0.0-20160226214623-1ea25387ff6f // indirect
 	github.com/gorilla/mux v1.6.1 // indirect
+	github.com/gorilla/websocket v1.4.2
 	github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce // indirect
 	github.com/hashicorp/go-multierror v0.0.0-20171204182908-b7773ae21874 // indirect
 	github.com/mattn/go-isatty v0.0.3 // indirect

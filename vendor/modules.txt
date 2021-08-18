@@ -84,6 +84,9 @@ github.com/gorilla/context
 # github.com/gorilla/mux v1.6.1
 ## explicit
 github.com/gorilla/mux
+# github.com/gorilla/websocket v1.4.2
+## explicit
+github.com/gorilla/websocket
 # github.com/hashicorp/errwrap v0.0.0-20141028054710-7554cd9344ce
 ## explicit
 github.com/hashicorp/errwrap
