@@ -27,6 +27,12 @@ func init() {
 				UI:       defaultUI,
 			}, nil
 		},
+		"console": func() (cli.Command, error) {
+			return &command.ConsoleCommand{
+				Client: client,
+				UI:     defaultUI,
+			}, nil
+		},
 		"delete": func() (cli.Command, error) {
 			return &command.DeleteCommand{
 				Projects: client.Projects,
