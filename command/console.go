@@ -3,6 +3,7 @@ package command
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -39,9 +40,6 @@ Usage: sloppy console [OPTIONS] (PROJECT/SERVICE/APP) (COMMAND)
 
   Attach to the console session of an application.
 
-  If no command is specified an interactive session will be attempted,
-  this uses the -i -t flags and requires a working TTY.
-
 Options:
 
   -i  attach stdin to the container
@@ -72,8 +70,8 @@ func (c *ConsoleCommand) Run(args []string) int {
 
 	args = cmdFlags.Args()
 
-	if len(args) == 0 {
-		return c.UI.ErrorNotEnoughArgs("console", "", 1)
+	if len(args) <= 1 {
+		return c.UI.ErrorNotEnoughArgs("console", "", 2)
 	}
 
 	appPath = args[0]
@@ -210,10 +208,15 @@ func (c *consoleExec) run(ctx context.Context) (int, error) {
 }
 
 func (c *consoleExec) initConnection() (*websocket.Conn, error) {
-	url := fmt.Sprintf("%sconsole?token=%s&app=%s",
+	cmd, err := json.Marshal(c.command)
+	if err != nil {
+		return nil, err
+	}
+	url := fmt.Sprintf("%sconsole?token=%s&app=%s&cmd=%s",
 		strings.Replace(c.client.GetBaseURL(), "https://", "wss://", 1),
 		strings.TrimPrefix(c.client.GetHeader("Authorization")[0], "Bearer "),
 		c.app,
+		string(cmd),
 	)
 	headers := http.Header{
 		"Origin": []string{origin},
