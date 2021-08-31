@@ -193,16 +193,18 @@ func (c *consoleExec) run(ctx context.Context) (int, error) {
 	defer ws.Close()
 
 	sendErrCh := c.setupSend(ctx, ws)
-	recvErrCh := c.setupReceive(ctx, ws)
+	exitCh, recvErrCh := c.setupReceive(ctx, ws)
 
 	for {
 		select {
 		case <-ctx.Done():
-			return 1, err
+			return 1, ctx.Err()
 		case sendErr := <-sendErrCh:
 			return 1, sendErr
 		case recvErr := <-recvErrCh:
 			return 1, recvErr
+		case exitCode := <-exitCh:
+			return exitCode, nil
 		}
 	}
 }
@@ -279,17 +281,32 @@ func (c *consoleExec) setupSend(ctx context.Context, conn *websocket.Conn) <-cha
 	return errCh
 }
 
-func (c *consoleExec) setupReceive(ctx context.Context, conn *websocket.Conn) <-chan error {
+func (c *consoleExec) setupReceive(ctx context.Context, conn *websocket.Conn) (<-chan int, <-chan error) {
+	exitCh := make(chan int, 1)
 	errCh := make(chan error, 1)
 
 	go func() {
 		for ctx.Err() == nil {
+			// messages are assumed to be of type 1 (text)
 			_, d, err := conn.ReadMessage()
-			// check if the error is due to a closed connection
+
+			// first we check if the error is due to a prematurely closed connection
 			if websocket.IsCloseError(err, websocket.CloseNormalClosure) {
 				errCh <- fmt.Errorf("websocket closed before receiving exit code: %w", err)
 				return
 			} else if err != nil {
+				// err might also carry the command exit code
+				if e, ok := err.(*websocket.CloseError); ok {
+					// the range 4000-4999 is used for returning the command exit codes as
+					// it's designated by rfc6455 for private use
+					if e.Code >= 4000 && e.Code <= 4999 {
+						// thus subtract 4000 to regain the original exit code
+						exitCh <- e.Code - 4000
+						return
+					}
+				}
+
+				// all other cases are passed on unaltered
 				errCh <- err
 				return
 			}
@@ -300,5 +317,5 @@ func (c *consoleExec) setupReceive(ctx context.Context, conn *websocket.Conn) <-
 		}
 	}()
 
-	return errCh
+	return exitCh, errCh
 }
