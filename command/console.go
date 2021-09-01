@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strings"
@@ -214,18 +215,23 @@ func (c *consoleExec) initConnection() (*websocket.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	url := fmt.Sprintf("%sconsole?token=%s&app=%s&cmd=%s",
-		strings.Replace(c.client.GetBaseURL(), "https://", "wss://", 1),
-		strings.TrimPrefix(c.client.GetHeader("Authorization")[0], "Bearer "),
-		c.app,
-		string(cmd),
-	)
-	headers := http.Header{
-		"Origin": []string{origin},
+
+	baseURL, err := url.Parse(strings.Replace(c.client.GetBaseURL(), "https://", "wss://", 1))
+	if err != nil {
+		return nil, err
 	}
 
+	baseURL.Path += "console"
+
+	params := url.Values{}
+	params.Add("token", strings.TrimPrefix(c.client.GetHeader("Authorization")[0], "Bearer "))
+	params.Add("app", c.app)
+	params.Add("cmd", string(cmd))
+
+	baseURL.RawQuery = params.Encode()
+
 	dialer := websocket.Dialer{}
-	conn, _, err := dialer.Dial(url, headers)
+	conn, _, err := dialer.Dial(baseURL.String(), http.Header{"Origin": []string{origin}})
 	if err != nil {
 		return nil, err
 	}
