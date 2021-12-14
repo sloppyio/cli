@@ -75,10 +75,18 @@ func (c *ConsoleCommand) Run(args []string) int {
 		return c.UI.ErrorNotEnoughArgs("console", "", 2)
 	}
 
+	appsClient := c.Client.Apps
 	appPath = args[0]
+	app := strings.Split(strings.Trim(appPath, "/"), "/")
 
-	if !(strings.Count(strings.Trim(appPath, "/"), "/") == 2) {
+	if len(app) != 3 {
 		return c.UI.ErrorInvalidAppPath(args[0])
+	}
+
+	_, _, err := appsClient.Get(app[0], app[1], app[2])
+	if err != nil {
+		c.UI.Error(err.Error())
+		return 1
 	}
 
 	if ttyOpt && !stdinOpt {
